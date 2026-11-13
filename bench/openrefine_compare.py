@@ -131,6 +131,11 @@ def main() -> int:
     ap.add_argument("--sample", type=int, default=0)
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--out", default="bench/out/openrefine_compare.json")
+    ap.add_argument(
+        "--slow",
+        action="store_true",
+        help="also run Levenshtein on the title + author column (no result after 20 minutes on the full set)",
+    )
     a = ap.parse_args()
     recs = [r for r in OpenITI(a.metadata).records() if r.author and r.title]
     if a.sample:
@@ -157,6 +162,11 @@ def main() -> int:
         identical = [ids for ids in by_val.values() if len(ids) > 1]
         res[f"{name} | identical values"] = score(identical, truth)
         for cname, cl in CLUSTERERS.items():
+            if cl["type"] == "knn" and name == "title + author" and not a.slow:
+                res["note"] = (
+                    f"{name} | {cname} not run: no result after 20 minutes on the full set (--slow runs it)"
+                )
+                continue
             t0 = time.perf_counter()
             clusters = rf.clusters(pid, col, cl)
             secs = time.perf_counter() - t0
