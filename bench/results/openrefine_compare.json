@@ -1,0 +1,50 @@
+{
+ "records": 12688,
+ "openrefine": "3.10.1",
+ "note": "title + author | levenshtein (radius 2) stopped after 20 minutes without a result",
+ "title | fingerprint": {
+  "true_positive": 4052,
+  "false_positive": 2196,
+  "precision": 0.6485,
+  "recall": 0.5586,
+  "positive_pairs": 7254,
+  "clusters": 19,
+  "seconds": 0.2
+ },
+ "title | ngram-fingerprint (2)": {
+  "true_positive": 4075,
+  "false_positive": 2200,
+  "precision": 0.6494,
+  "recall": 0.5618,
+  "positive_pairs": 7254,
+  "clusters": 40,
+  "seconds": 0.1
+ },
+ "title | levenshtein (radius 2)": {
+  "true_positive": 4196,
+  "false_positive": 2579,
+  "precision": 0.6193,
+  "recall": 0.5784,
+  "positive_pairs": 7254,
+  "clusters": 350,
+  "seconds": 38.8
+ },
+ "title + author | fingerprint": {
+  "true_positive": 3187,
+  "false_positive": 1116,
+  "precision": 0.7406,
+  "recall": 0.4393,
+  "positive_pairs": 7254,
+  "clusters": 49,
+  "seconds": 0.2
+ },
+ "title + author | ngram-fingerprint (2)": {
+  "true_positive": 3199,
+  "false_positive": 1117,
+  "precision": 0.7412,
+  "recall": 0.441,
+  "positive_pairs": 7254,
+  "clusters": 62,
+  "seconds": 0.2
+ }
+}

@@ -1,0 +1,26 @@
+{
+ "openiti_versions": 3566,
+ "shamela_books_labelled": 3557,
+ "pairs_compared": 62344,
+ "seconds": 53.2,
+ "work": {
+  "tp": 2853,
+  "fp": 11,
+  "review_pos": 246,
+  "review_neg": 32,
+  "pos": 3985,
+  "precision": 0.9962,
+  "recall": 0.7159
+ },
+ "edition": {
+  "tp": 1336,
+  "fp": 9,
+  "fn": 171,
+  "tn": 122,
+  "uncertain_pos": 1178,
+  "uncertain_neg": 37,
+  "precision": 0.9933,
+  "recall": 0.4976,
+  "different_rejected": 0.7262
+ }
+}

@@ -24,16 +24,16 @@ list, and your decisions on it are kept.
 
 ## Why turath-match? How it compares
 
-Measured on public data: the {OW_RECORDS:,} Arabic text versions of OpenITI 2025.1.9, whose book URIs (curated by
+Measured on public data: the 12,688 Arabic text versions of OpenITI 2025.1.9, whose book URIs (curated by
 the KITAB project) say which versions are one work. The matcher never sees the URIs. Every number below comes from
 [`bench/compare.sh`](bench/compare.sh), run on a 32-vCPU server on 2026-11-13.
 
-| Same-work pairs among {OW_RECORDS:,} OpenITI versions ({OW_POS:,} true pairs) | Precision | Recall | Reason given per decision |
+| Same-work pairs among 12,688 OpenITI versions (7,254 true pairs) | Precision | Recall | Reason given per decision |
 |---|---:|---:|---|
-| **turath-match 0.1** | **{OW_P}** | **{OW_R}** (+ {OW_REV_POS:,} more on the review list) | ✓ every one |
-| OpenRefine 3.10.1, fingerprint clustering, title + author | {OR_TA_FP_P} | {OR_TA_FP_R} | ✗ |
-| OpenRefine 3.10.1, nearest-neighbour Levenshtein (radius 2), title | {OR_T_LEV_P} | {OR_T_LEV_R} | ✗ |
-| OpenRefine 3.10.1, fingerprint clustering, title only | {OR_T_FP_P} | {OR_T_FP_R} | ✗ |
+| **turath-match 0.1** | **0.984** | **0.812** (+ 332 more on the review list) | ✓ every one |
+| OpenRefine 3.10.1, fingerprint clustering, title + author | 0.741 | 0.439 | ✗ |
+| OpenRefine 3.10.1, nearest-neighbour Levenshtein (radius 2), title | 0.619 | 0.578 | ✗ |
+| OpenRefine 3.10.1, fingerprint clustering, title only | 0.648 | 0.559 | ✗ |
 
 | Checked 2026-11-13 | turath-match | Searching Shamela / Waqfeya / archive.org by hand | OpenRefine 3.10.1 | Calibre (metadata download, Find Duplicates plugin) | OpenITI / KITAB tools |
 |---|---|---|---|---|---|
@@ -52,19 +52,19 @@ own HTTP API ([`bench/openrefine_compare.py`](bench/openrefine_compare.py)).
 
 **What makes the difference, with evidence:**
 
-1. **Precision first.** {OW_P_PCT} of the pairs turath-match calls «the same work» are the same OpenITI work;
-   OpenRefine's best clustering of the same records reaches {OR_BEST_P_PCT}. Common names never carry a match, and
+1. **Precision first.** 98.4 % of the pairs turath-match calls «the same work» are the same OpenITI work;
+   OpenRefine's best clustering of the same records reaches 74.1 %. Common names never carry a match, and
    «شرح», «مختصر», «ذيل», «رواية» make a *related* work, never the work ([the rules](docs/matching.md)).
 2. **Editions, not only works.** Against the Shamela books OpenITI texts were made from (run on your own install
-   with [`bench/shamela_openiti.py`](bench/shamela_openiti.py)), {SO_E_P_PCT} of «same edition» verdicts are right.
+   with [`bench/shamela_openiti.py`](bench/shamela_openiti.py)), 99.3 % of «same edition» verdicts are right.
 3. **Bytes beat names.** A file called `Muqaddima-scan.pdf` is the Bibliotheca Alexandrina's 1886 print because
    its size is 50,126,380 bytes; a file with no author takes its author from the record of the scan it is
    (`turath-match demo` shows both).
-4. **Every decision explains itself.** {EVIDENCE_PCT} of the {N_DECISIONS:,} decisions made in these benchmarks carry
+4. **Every decision explains itself.** 100 % of the 300,155 decisions made in these benchmarks carry
    their evidence, and `turath-match explain` prints it for any pair.
-5. **A morning, not a week.** A 500-book library against the whole OpenITI catalog ({L5_TARGETS:,} works) takes
-   {L5_SECS} s: {L5_FOUND} books found with {L5_P_PCT} precision, {L5_REVIEW} items left for a person. Checked by hand
-   at an assumed 3 minutes a book, the same library is {L5_MANUAL_H} hours of work.
+5. **Minutes, not days.** A 500-book library against the whole OpenITI catalog (8,233 works) takes
+   154 s: 376 books found with 99.5 % precision, 80 items left for a person. Checked by hand
+   at an assumed 3 minutes a book, the same library is 25 hours of work.
 
 **When to use something else.** To clean a general spreadsheet or reconcile names against Wikidata, use OpenRefine.
 To manage e-books on a reader, use Calibre. To study text reuse between works (which passages one author took from
@@ -83,7 +83,10 @@ at work, edition and file level, and prove it.
 | `review` | a possible match the evidence cannot settle: fill in `review.tsv` and pass it back with `-d` |
 | `missing` | not in the library, with trustworthy copies (archive.org files with exact sizes, OpenITI texts) |
 
+<img src="docs/media/report-small.webp" align="right" width="275" alt="The full demo report">
+
 ![turath-match explain on four pairs](docs/media/explain.svg)
+<br clear="right">
 
 ## Features
 
@@ -161,10 +164,10 @@ print(m.explain())
 
 | Benchmark ([`bench/compare.sh`](bench/compare.sh), 2026-11-13) | Size | Precision | Recall | Time (12 workers) |
 |---|---:|---:|---:|---:|
-| Work level: OpenITI versions against each other | {OW_RECORDS:,} versions, {OW_PAIRS:,} pairs compared | {OW_P} | {OW_R} | {OW_SECS} s |
-| Work level: OpenITI against the Shamela books they were made from | {SO_V:,} × {SO_S:,} | {SO_W_P} | {SO_W_R} | {SO_SECS} s |
-| Edition level: the same pairs | {SO_E_N:,} same-work pairs | {SO_E_P} | {SO_E_R} | |
-| A 500-book library against the OpenITI catalog | 500 × {L5_TARGETS:,} | {L5_P} | {L5_R} | {L5_SECS} s (1 process) |
+| Work level: OpenITI versions against each other | 12,688 versions, 237,811 pairs compared | 0.984 | 0.812 | 271 s |
+| Work level: OpenITI against the Shamela books they were made from | 3,566 × 3,557 | 0.996 | 0.716 | 53 s |
+| Edition level: the same pairs | 2,853 same-work pairs | 0.993 | 0.498 | |
+| A 500-book library against the OpenITI catalog | 500 × 8,233 | 0.995 | 0.752 | 154 s (1 process) |
 
 Method, every table and the kinds of error: [docs/benchmarks.md](docs/benchmarks.md). Recall counts every pair OpenITI files under one book URI, including volumes split into separate texts, hadith
 *juz'* collections filed under their compiler, and titles that share no word at all (*al-Wajīz* and *Tafsīr
