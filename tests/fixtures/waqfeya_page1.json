@@ -1,0 +1,6 @@
+{"data": [
+ {"_id": "w0000000000000000000001", "name": "طوق الحمامة في الألفة والألاف", "permalink": "tawq-1", "visitCounts": 10,
+  "category": {"name": "الأدب"}, "author": {"name": "ابن حزم الأندلسي"}, "thumbnail": "https://archive.org/download/demo-tawq/cover.jpg"},
+ {"_id": "w0000000000000000000002", "name": "البيان والتبيين", "permalink": "bayan-2", "visitCounts": 5,
+  "category": {"name": "البلاغة"}, "author": {"name": "الجاحظ"}}
+], "pagination": {"page": 1, "pageSize": 2, "totalPages": 2}}

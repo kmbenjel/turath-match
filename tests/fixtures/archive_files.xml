@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files>
+  <file name="kitab-01.pdf" source="original">
+    <mtime>1600000000</mtime>
+    <size>12196642</size>
+    <md5>0f1e2d3c4b5a69788796a5b4c3d2e1f0</md5>
+    <sha1>1111111111111111111111111111111111111111</sha1>
+    <format>Image Container PDF</format>
+  </file>
+  <file name="kitab-02.pdf" source="original">
+    <size>13000001</size>
+    <md5>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</md5>
+    <format>Image Container PDF</format>
+  </file>
+  <file name="kitab-01_text.pdf" source="derivative">
+    <size>3000000</size>
+    <format>Additional Text PDF</format>
+  </file>
+  <file name="kitab_djvu.txt" source="derivative">
+    <size>400000</size>
+    <format>DjVuTXT</format>
+  </file>
+  <file name="__ia_thumb.jpg" source="original">
+    <size>3399</size>
+    <format>Item Tile</format>
+  </file>
+</files>

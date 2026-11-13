@@ -1,0 +1,5 @@
+{"responseHeader": {"status": 0}, "response": {"numFound": 3, "start": 0, "docs": [
+ {"identifier": "demo-kalila-1922", "title": "كتاب كليلة ودمنة", "creator": "ابن المقفع، عبد الله", "downloads": 114, "date": "1922-01-01T00:00:00Z"},
+ {"identifier": "demo-kalila-study", "title": "قصص الحيوان بين كليلة ودمنة وحكايات إيسوب", "downloads": 120},
+ {"identifier": "demo-other", "title": "الأدب الصغير", "creator": "ابن المقفع"}
+]}}
