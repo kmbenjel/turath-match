@@ -24,7 +24,7 @@ folder.
   titles and author names are bibliographic facts, but a bulk copy of Shamela's catalog fields is a different
   matter, so do not publish exports wholesale.
 - **Benchmarks:** `bench/shamela_openiti.py` runs on your install and prints counts only.
-- **Open question (for the maintainers, not the user):** whether a future version may publish derived identifiers
-  (Shamela book ids next to OpenITI URIs) in an open dataset. OpenITI already publishes Shamela ids inside its own
-  version URIs (`…Shamela0001681-ara1`), which suggests it is accepted practice, but this has not been confirmed with
-  the Shamela maintainers.
+- **Identifiers:** the Shamela book ids that turath-match finds go only into the files you produce on your own
+  machine (`matches.jsonl`, `crosswalk.jsonl`, the reports). OpenITI's own version URIs carry Shamela ids
+  (`…Shamela0001681-ara1`); turath-match reads them there like any other field of the OpenITI metadata, and those
+  URIs are the only Shamela ids in the package (in the demo's OpenITI rows).
