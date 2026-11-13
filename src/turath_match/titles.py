@@ -210,7 +210,9 @@ def _is_head(short: list[str], long: list[str]) -> bool:
     )
 
 
-def _compare_forms(a: TitleForm, b: TitleForm, names: frozenset[str] = frozenset()) -> TitleComparison:
+def _compare_forms(
+    a: TitleForm, b: TitleForm, names: frozenset[str] = frozenset(), shown: str = ""
+) -> TitleComparison:
     ca, cb = a.core, b.core
     # «مقدمة ابن خلدون» = «المقدمة» by Ibn Khaldun: words that only name the author do not tell works apart
     if names:
@@ -224,9 +226,16 @@ def _compare_forms(a: TitleForm, b: TitleForm, names: frozenset[str] = frozenset
     sa, sb = set(ca), set(cb)
     miss_b = [x for x in ca if not has(x, sb)]  # in a, not in b
     miss_a = [x for x in cb if not has(x, sa)]
-    joined = f"«{' '.join(ca)}» / «{' '.join(cb)}»"
+    joined = shown or f"«{' '.join(ca)}» / «{' '.join(cb)}»"
     ma, mb = a.mandatory, b.mandatory
-    if (ma or mb) and (ma - sb or mb - sa):
+    rest_a = [x for x in ca if x not in ma and x not in PART_INTRO]
+    rest_b = [x for x in cb if x not in mb and x not in PART_INTRO]
+    short_rest = min(rest_a, rest_b, key=len)
+    long_rest = set(rest_b if short_rest is rest_a else rest_a)
+    agree_rest = bool(short_rest) and sum(1 for x in short_rest if has(x, long_rest)) >= max(
+        1, len(short_rest) - 1
+    )
+    if (ma or mb) and (ma - sb or mb - sa) and agree_rest:  # the same title, another recension or part
         side = "left" if ma - sb and not (mb - sa) else "right" if mb - sa and not (ma - sb) else None
         rel = "recension" if any(base(x) in ("روايه", "بروايه") for x in ca + cb) else "part"
         if side is None:
@@ -257,7 +266,13 @@ def _compare_forms(a: TitleForm, b: TitleForm, names: frozenset[str] = frozenset
         covered = [x for x in short if has(x, set(long_)) or any(has(y, {x}) for y in long_)]
         if len(covered) >= max(1, len(short) - (1 if len(short) >= 4 else 0)):
             words = "/".join(e for e in extra if base(e) in RELATIONS)
-            return TitleComparison("related", 0.7, f"«{words}» makes it a {rels[0]} {joined}", rels[0], side)
+            return TitleComparison(
+                "related",
+                0.7,
+                f"«{words}» makes it {'an' if rels[0][0] in 'aeiou' else 'a'} {rels[0]} {joined}",
+                rels[0],
+                side,
+            )
     slack = max(
         1, min(len(ca), len(cb)) // 4
     )  # long titles: one word in four may be spelt or cut differently
@@ -284,11 +299,26 @@ def compare_titles(a: TitleInfo, b: TitleInfo, names: Iterable[str] = ()) -> Tit
     (comparison form), which a title may carry («تفسير الطبري») without naming another work."""
     best = TitleComparison("none", 0.0, "no title words")
     nm = frozenset(names)
+    shown = f"«{a.raw.strip()}» / «{b.raw.strip()}»"
+    veto = None
     for fa in a.forms:
         for fb in b.forms:
-            c = _compare_forms(fa, fb, nm)
+            c = _compare_forms(fa, fb, nm, shown)
+            if c.kind == "conflict":
+                veto = veto or c
             if (ORDER[c.kind], c.score) > (ORDER[best.kind], best.score):
                 best = c
+    if veto is not None and best.kind in ("exact", "head", "fuzzy"):
+        # «مسائل أحمد رواية عبد الله = مسائل أحمد» / «مسائل أحمد رواية ابن هانئ = …»: a generic alternative title
+        # never overrides the recension, part or size one of the titles names
+        return veto
+    za = {w for f in a.forms for w in f.core} & SIZE
+    zb = {w for f in b.forms for w in f.core} & SIZE
+    if best.kind in ("exact", "head") and bool(za) != bool(zb):
+        # «كتاب السنن الكبرى = كتاب السنن» / «سنن»: one record says which of the author's Sunan it is
+        best = TitleComparison(
+            best.kind, min(best.score, 0.7), best.detail + f"; only one says «{'/'.join(za | zb)}»"
+        )
     return best
 
 

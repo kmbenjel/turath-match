@@ -55,6 +55,14 @@ def strip_death(name: str) -> str:
     return " ".join(_DEATH_NOTE.sub(" ", name or "").split())
 
 
+_PARTICLES = set(search_key("بن ابن بنت أبو أبي أبا أم عبد ال").split())
+
+
+def _name_words(name: str) -> set[str]:
+    """Every word of a name but the particles: «محمد» counts here (it is evidence of nothing, but not of two people)."""
+    return {tok(w) for w in search_key(strip_death(name)).split() if w not in _PARTICLES and len(w) > 1}
+
+
 _ORDER = {"same": 2, "unknown": 1, "different": 0}
 
 
@@ -149,6 +157,18 @@ def match_work(a: Record, b: Record) -> Match:
         )
     )
 
+    if tc.kind == "related" and tc.relation not in ("part", "recension") and am_verdict != "same":
+        # «المنتخب من كتاب الزهد والرقائق» is not built on every «الزهد»: a one-word base needs its author named
+        base_rec, der = (b, ta) if tc.derived_side == "left" else (a, tb)
+        base_words = min((len(f.core) for f in (tb if tc.derived_side == "left" else ta).forms), default=0)
+        own = {tok(x) for x in author_tokens(base_rec.author)}
+        if base_words <= 1 and not own & {w for f in der.forms for w in f.words}:
+            ev.append(
+                Evidence(
+                    "derivation", "a one-word title, and the derived title does not name its author", -0.5
+                )
+            )
+            return Match(a, b, "work", DIFFERENT, 0.6, FUZZY_TITLE_AUTHOR, ev)
     if tc.kind == "related":
         ev.append(
             Evidence("derivation", f"{tc.relation}: the {tc.derived_side} record is built on the other", -1.0)
@@ -182,6 +202,8 @@ def match_work(a: Record, b: Record) -> Match:
         return Match(a, b, "work", DIFFERENT, 0.9 if tc.kind == "exact" else 0.85, method, ev)
     n = min(len(f.core) for f in (ta.forms[:1] + tb.forms[:1])) if ta.forms and tb.forms else 0
     score = _UNKNOWN_SCORE.get(key, 0.4) - (0.1 if tc.kind == "exact" and n == 2 else 0.0)
+    if a.author and b.author and not _name_words(a.author) & _name_words(b.author):
+        score -= 0.15  # two named authors who share no name at all: probably two people
     why = (
         "an author is missing"
         if not (a.author and b.author)

@@ -14,6 +14,10 @@ EXACT_SIZE, HASH, SAMPLED_BYTES = "exact_size", "hash", "sampled_bytes"
 EXACT_TITLE_AUTHOR, FUZZY_TITLE_AUTHOR, MANUAL = "exact_title_author", "fuzzy_title_author", "manual"
 
 
+#: an uncertain pair below this score is too weak to put before a person (a one-word title, unrelated names)
+REVIEW_FLOOR = 0.45
+
+
 def confidence_label(score: float) -> str:
     """high >= 0.85, medium >= 0.6, low otherwise (the turath-catalog enum)."""
     return "high" if score >= 0.85 else "medium" if score >= 0.6 else "low"
@@ -135,7 +139,9 @@ class Match:
     def status(self) -> str:
         if self.verdict == SAME and self.score >= 0.85:
             return MATCH
-        if self.verdict == UNCERTAIN or (self.verdict == SAME and self.score >= 0.5):
+        if (self.verdict == UNCERTAIN and self.score >= REVIEW_FLOOR) or (
+            self.verdict == SAME and self.score >= 0.5
+        ):
             return REVIEW
         return NO_MATCH
 

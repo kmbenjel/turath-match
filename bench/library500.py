@@ -31,8 +31,12 @@ def main() -> int:
     ap.add_argument("metadata")
     ap.add_argument("--n", type=int, default=500)
     ap.add_argument("--seed", type=int, default=11)
-    ap.add_argument("--manual-minutes", type=float, default=3.0,
-                    help="assumed minutes for one person to check one catalog lookup by hand")
+    ap.add_argument(
+        "--manual-minutes",
+        type=float,
+        default=3.0,
+        help="assumed minutes for one person to check one catalog lookup by hand",
+    )
     ap.add_argument("--out", default="bench/out/library500.json")
     a = ap.parse_args()
 
@@ -61,11 +65,19 @@ def main() -> int:
     review = c["review"]
     decided = len(have_truth) - review_true
     res = {
-        "library_books": len(lib), "catalog_works": len(targets), "seconds": round(secs, 1),
-        "statuses": dict(c), "found": tp, "wrongly_found": fp,
-        "precision": round(tp / max(1, tp + fp), 4), "recall": round(tp / len(have_truth), 4),
-        "on_review_list": review, "review_items_that_are_in_the_library": review_true,
-        "matches_with_evidence": round(sum(1 for m in rec.matches if m.evidence) / max(1, len(rec.matches)), 4),
+        "library_books": len(lib),
+        "catalog_works": len(targets),
+        "seconds": round(secs, 1),
+        "statuses": dict(c),
+        "found": tp,
+        "wrongly_found": fp,
+        "precision": round(tp / max(1, tp + fp), 4),
+        "recall": round(tp / len(have_truth), 4),
+        "on_review_list": review,
+        "review_items_that_are_in_the_library": review_true,
+        "matches_with_evidence": round(
+            sum(1 for m in rec.matches if m.evidence) / max(1, len(rec.matches)), 4
+        ),
         "manual_minutes_per_book_assumed": a.manual_minutes,
         "manual_hours_for_the_library": round(len(lib) * a.manual_minutes / 60, 1),
         "person_hours_left_with_turath_match": round(review * a.manual_minutes / 60, 1),

@@ -28,8 +28,16 @@ from turath_match.sources.openiti import OpenITI
 
 CLUSTERERS = {
     "fingerprint": {"type": "binning", "function": "fingerprint", "params": {}},
-    "ngram-fingerprint (2)": {"type": "binning", "function": "ngram-fingerprint", "params": {"ngram-size": 2}},
-    "levenshtein (radius 2)": {"type": "knn", "function": "levenshtein", "params": {"radius": 2, "blocking-ngram-size": 6}},
+    "ngram-fingerprint (2)": {
+        "type": "binning",
+        "function": "ngram-fingerprint",
+        "params": {"ngram-size": 2},
+    },
+    "levenshtein (radius 2)": {
+        "type": "knn",
+        "function": "levenshtein",
+        "params": {"radius": 2, "blocking-ngram-size": 6},
+    },
 }
 
 
@@ -41,7 +49,7 @@ class Refine:
         req = urllib.request.Request(self.url + path, data=data)
         if ctype:
             req.add_header("Content-Type", ctype)
-        with urllib.request.urlopen(req, timeout=3600) as r:  # noqa: S310 - local server
+        with urllib.request.urlopen(req, timeout=3600) as r:
             return bytes(r.read())
 
     def token(self) -> str:
@@ -49,19 +57,27 @@ class Refine:
 
     def create(self, name: str, tsv: str) -> str:
         b = uuid.uuid4().hex
-        opts = json.dumps({"separator": "\t", "headerLines": 1, "guessCellValueTypes": False, "encoding": "UTF-8"})
+        opts = json.dumps(
+            {"separator": "\t", "headerLines": 1, "guessCellValueTypes": False, "encoding": "UTF-8"}
+        )
         parts = []
         for k, v in (("project-name", name), ("format", "text/line-based/*sv"), ("options", opts)):
             parts.append(f'--{b}\r\nContent-Disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'.encode())
-        parts.append(f'--{b}\r\nContent-Disposition: form-data; name="project-file"; filename="d.tsv"\r\n'
-                     f"Content-Type: text/tab-separated-values\r\n\r\n".encode() + tsv.encode("utf-8") + b"\r\n")
+        parts.append(
+            f'--{b}\r\nContent-Disposition: form-data; name="project-file"; filename="d.tsv"\r\n'
+            f"Content-Type: text/tab-separated-values\r\n\r\n".encode()
+            + tsv.encode("utf-8")
+            + b"\r\n"
+        )
         parts.append(f"--{b}--\r\n".encode())
-        req = urllib.request.Request(f"{self.url}/command/core/create-project-from-upload?csrf_token={self.token()}",
-                                     data=b"".join(parts))
+        req = urllib.request.Request(
+            f"{self.url}/command/core/create-project-from-upload?csrf_token={self.token()}",
+            data=b"".join(parts),
+        )
         req.add_header("Content-Type", f"multipart/form-data; boundary={b}")
 
         class NoRedirect(urllib.request.HTTPRedirectHandler):
-            def redirect_request(self, *a, **k):  # noqa: ANN002, ANN003
+            def redirect_request(self, *a, **k):
                 return None
 
         opener = urllib.request.build_opener(NoRedirect)
@@ -73,12 +89,19 @@ class Refine:
         return urllib.parse.parse_qs(urllib.parse.urlsplit(loc).query)["project"][0]
 
     def clusters(self, project: str, column: str, clusterer: dict) -> list[list[str]]:
-        body = urllib.parse.urlencode({
-            "engine": json.dumps({"facets": [], "mode": "row-based"}),
-            "clusterer": json.dumps({**clusterer, "column": column}),
-        }).encode()
-        out = json.loads(self._req(f"/command/core/compute-clusters?project={project}&csrf_token={self.token()}",
-                                   body, "application/x-www-form-urlencoded"))
+        body = urllib.parse.urlencode(
+            {
+                "engine": json.dumps({"facets": [], "mode": "row-based"}),
+                "clusterer": json.dumps({**clusterer, "column": column}),
+            }
+        ).encode()
+        out = json.loads(
+            self._req(
+                f"/command/core/compute-clusters?project={project}&csrf_token={self.token()}",
+                body,
+                "application/x-www-form-urlencoded",
+            )
+        )
         return [[c["v"] for c in cl] for cl in out]
 
 
@@ -92,8 +115,13 @@ def score(groups: list[list[int]], truth: list[str]) -> dict[str, float]:
                 tp += 1
             else:
                 fp += 1
-    return {"true_positive": tp, "false_positive": fp, "precision": round(tp / max(1, tp + fp), 4),
-            "recall": round(tp / max(1, n_pos), 4), "positive_pairs": n_pos}
+    return {
+        "true_positive": tp,
+        "false_positive": fp,
+        "precision": round(tp / max(1, tp + fp), 4),
+        "recall": round(tp / max(1, n_pos), 4),
+        "positive_pairs": n_pos,
+    }
 
 
 def main() -> int:
@@ -115,7 +143,9 @@ def main() -> int:
         "title": [clean(r.title.split(" = ")[0]) for r in recs],
         "title + author": [clean(r.title.split(" = ")[0] + " | " + r.author.split(" ؛ ")[0]) for r in recs],
     }
-    tsv = "title\ttitle_author\n" + "".join(f"{t}\t{ta}\n" for t, ta in zip(keys["title"], keys["title + author"], strict=True))
+    tsv = "title\ttitle_author\n" + "".join(
+        f"{t}\t{ta}\n" for t, ta in zip(keys["title"], keys["title + author"], strict=True)
+    )
     rf = Refine(a.url)
     pid = rf.create(f"openiti-{int(time.time())}", tsv)
     res: dict[str, dict] = {"records": len(recs), "books": len(set(truth)), "openrefine": a.url}
@@ -138,8 +168,11 @@ def main() -> int:
             groups: dict[object, list[int]] = defaultdict(list)
             for i, v in enumerate(vals):
                 groups[merged.get(v, ("v", v))].append(i)
-            res[f"{name} | {cname}"] = {**score([g for g in groups.values() if len(g) > 1], truth),
-                                       "clusters": len(clusters), "seconds": round(secs, 1)}
+            res[f"{name} | {cname}"] = {
+                **score([g for g in groups.values() if len(g) > 1], truth),
+                "clusters": len(clusters),
+                "seconds": round(secs, 1),
+            }
             print(name, cname, res[f"{name} | {cname}"], flush=True)
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(res, ensure_ascii=False, indent=1), "utf-8")

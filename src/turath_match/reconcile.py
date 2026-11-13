@@ -353,7 +353,8 @@ def reconcile(
             )
         lib.append(r)
     lib_index = TokenIndex(lib)
-    copy_index = TokenIndex([*copy_recs, *tgts])
+    # copies come from the copy sources, and from targets that carry files of their own
+    copy_index = TokenIndex([*copy_recs, *(t for t in tgts if t.files)])
     lib_sizes: dict[int, list[tuple[Record, Any]]] = defaultdict(list)
     for r in lib:
         for f in r.files:

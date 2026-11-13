@@ -17,17 +17,25 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import random
 import sys
 import time
 from collections import Counter, defaultdict
 from dataclasses import replace
+from multiprocessing import Pool
 from pathlib import Path
 
 from turath_match.index import TokenIndex
 from turath_match.models import MATCH, RELATED, REVIEW, SAME
 from turath_match.sources.openiti import OpenITI
 from turath_match.work import match_work
+
+_BY_KEY: dict = {}
+
+
+def _score(k: tuple[str, str]):
+    return match_work(_BY_KEY[k[0]], _BY_KEY[k[1]])
 
 
 def main() -> int:
@@ -37,6 +45,7 @@ def main() -> int:
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--relations", help="OpenITI book_relations.json (optional)")
     ap.add_argument("--out", default="bench/out/openiti_works.json")
+    ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 2))
     a = ap.parse_args()
 
     recs = [r for r in OpenITI(a.metadata).records() if r.author and r.title]
@@ -50,17 +59,15 @@ def main() -> int:
 
     t0 = time.perf_counter()
     idx = TokenIndex(blind)
-    seen: set[tuple[str, str]] = set()
-    pred: dict[tuple[str, str], object] = {}
+    keys: set[tuple[str, str]] = set()
     for r in blind:
         for c in idx.candidates(r, limit=60):
-            if c.key == r.key:
-                continue
-            k = (r.key, c.key) if r.key < c.key else (c.key, r.key)
-            if k in seen:
-                continue
-            seen.add(k)
-            pred[k] = match_work(by_key[k[0]], by_key[k[1]])
+            if c.key != r.key:
+                keys.add((r.key, c.key) if r.key < c.key else (c.key, r.key))
+    global _BY_KEY
+    _BY_KEY = by_key
+    with Pool(a.workers) as pool:
+        pred = dict(zip(sorted(keys), pool.map(_score, sorted(keys), chunksize=500), strict=True))
     secs = time.perf_counter() - t0
 
     pos = Counter(truth.values())
@@ -74,7 +81,16 @@ def main() -> int:
                 tp += 1
             else:
                 fp += 1
-                fps.append((m.left.title, m.left.author[:40], m.right.title, m.right.author[:40], truth[k[0]], truth[k[1]]))
+                fps.append(
+                    (
+                        m.left.title,
+                        m.left.author[:40],
+                        m.right.title,
+                        m.right.author[:40],
+                        truth[k[0]],
+                        truth[k[1]],
+                    )
+                )
         elif m.status == REVIEW:
             rev_pos += same_book
             rev_neg += not same_book
@@ -86,24 +102,43 @@ def main() -> int:
     if a.relations:
         rels = json.loads(Path(a.relations).read_text("utf-8"))
         pairs = {frozenset((x["source"], x["dest"])) for v in rels.values() for x in v}
-        hits = [k for k, m in pred.items() if m.verdict == RELATED and frozenset((truth[k[0]], truth[k[1]])) in pairs]
+        hits = [
+            k
+            for k, m in pred.items()
+            if m.verdict == RELATED and frozenset((truth[k[0]], truth[k[1]])) in pairs
+        ]
         related_ok = {"related_pairs_in_openiti_relations": len(hits), "related_predicted": rel}
     res = {
-        "records": len(recs), "books": len(pos), "pairs_compared": len(pred), "seconds": round(secs, 1),
-        "positive_pairs": n_pos, "true_positive": tp, "false_positive": fp,
-        "precision": round(tp / max(1, tp + fp), 4), "recall": round(tp / max(1, n_pos), 4),
-        "review_same_book": rev_pos, "review_other_book": rev_neg,
-        "related_on_same_book": len(fns_proposed), "related": related_ok,
+        "records": len(recs),
+        "books": len(pos),
+        "pairs_compared": len(pred),
+        "seconds": round(secs, 1),
+        "positive_pairs": n_pos,
+        "true_positive": tp,
+        "false_positive": fp,
+        "precision": round(tp / max(1, tp + fp), 4),
+        "recall": round(tp / max(1, n_pos), 4),
+        "review_same_book": rev_pos,
+        "review_other_book": rev_neg,
+        "related_on_same_book": len(fns_proposed),
+        "related": related_ok,
         "evidence_share": round(sum(1 for m in pred.values() if m.evidence) / max(1, len(pred)), 4),
-        "false_positive_examples": fps[:40], "related_but_same_book_examples": fns_proposed[:20],
+        "false_positive_examples": fps[:40],
+        "related_but_same_book_examples": fns_proposed[:20],
     }
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(res, ensure_ascii=False, indent=1), "utf-8")
-    print(json.dumps({k: v for k, v in res.items() if not k.endswith("examples")}, ensure_ascii=False, indent=1))
+    print(
+        json.dumps({k: v for k, v in res.items() if not k.endswith("examples")}, ensure_ascii=False, indent=1)
+    )
     by_coll: dict[str, int] = defaultdict(int)
     for r in recs:
         by_coll[r.extra.get("source_collection") or "other"] += 1
-    print("versions by source collection:", dict(sorted(by_coll.items(), key=lambda x: -x[1])[:8]), file=sys.stderr)
+    print(
+        "versions by source collection:",
+        dict(sorted(by_coll.items(), key=lambda x: -x[1])[:8]),
+        file=sys.stderr,
+    )
     return 0
 
 
