@@ -16,18 +16,18 @@
 
 - **مقدمة ابن خلدون** — عبد الرحمن بن محمد بن خلدون `wishlist:W01`  
   library: المقدمة (ابن خلدون)  
-  work · same · high (0.92) via `exact_title_author`: exact: same one-word title «مقدمه» / «مقدمه»; same: «عبد الرحمن بن محمد بن خلدون» / «ابن خلدون» (shuhra:ابن خلدون)  
+  work · same · high (0.92) via `exact_title_author`: exact: same one-word title «مقدمة ابن خلدون» / «المقدمة»; same: «عبد الرحمن بن محمد بن خلدون» / «ابن خلدون» (shuhra:ابن خلدون)  
   file: Muqaddima-scan.pdf is `archive:AAlexandrina-164114` (164114 - مقدمة العلامة ابن خلدون.pdf, exact size)
 - **طوق الحمامة** — ابن حزم `wishlist:W04`  
   library: طوق الحمامة في الألفة والألاف (ابن حزم الأندلسي)  
   edition · same · high (0.85) via `fuzzy_title_author`: same editor: «إحسان عباس» / «إحسان عباس»; the editor is all the other record says about its edition
 - **كليلة ودمنة** — عبد الله بن المقفع `wishlist:W05`  
   library: كتاب كليلة ودمنة ("إبن المقفع، عبد الله")  
-  work · same · high (0.97) via `exact_title_author`: exact: same title words «كليله ودمنه» / «كليله ودمنه»; same: «عبد الله بن المقفع» / «"إبن المقفع، عبد الله"» (ism:عبد الله, nasab:المقفع); the author of library:L05 is read from archive:AAlexandrina-144704, the source of its file (exact size)  
+  work · same · high (0.97) via `exact_title_author`: exact: same title words «كليلة ودمنة» / «كتاب كليلة ودمنة»; same: «عبد الله بن المقفع» / «"إبن المقفع، عبد الله"» (ism:عبد الله, nasab:المقفع); the author of library:L05 is read from archive:AAlexandrina-144704, the source of its file (exact size)  
   file: kalila.pdf is `archive:AAlexandrina-144704` (144704 - كتاب كليلة ودمنة.pdf, exact size)
 - **الجامع المسند الصحيح = صحيح البخاري** — محمد بن إسماعيل البخاري `wishlist:W08`  
   library: صحيح البخاري (البخاري)  
-  work · same · high (0.92) via `exact_title_author`: exact: same one-word title «صحيح» / «صحيح»; same: «محمد بن إسماعيل البخاري» / «البخاري» (nisba:البخاري)
+  work · same · high (0.92) via `exact_title_author`: exact: same one-word title «الجامع المسند الصحيح = صحيح البخاري» / «صحيح البخاري»; same: «محمد بن إسماعيل البخاري» / «البخاري» (nisba:البخاري)
 
 ## Other edition · طبعة أخرى (2)
 
@@ -47,7 +47,7 @@
 ## Related work only · عمل متصل به فقط (1)
 
 - **ديوان المتنبي** — أبو الطيب المتنبي `wishlist:W03`  
-  work · related · medium (0.70) via `fuzzy_title_author`: related: «شرح» makes it a commentary «شعر متنبي» / «شرح شعر متنبي»; different: «أبو الطيب المتنبي» / «عبد الرحمن البرقوقي» (nisba-conflict:المتنبي!=البرقوقي); commentary: the right record is built on the other  
+  work · related · medium (0.70) via `fuzzy_title_author`: related: «شرح» makes it a commentary «ديوان المتنبي» / «شرح ديوان المتنبي»; different: «أبو الطيب المتنبي» / «عبد الرحمن البرقوقي» (nisba-conflict:المتنبي!=البرقوقي); commentary: the right record is built on the other  
   related: شرح ديوان المتنبي — commentary  
   copy: [ديوان المتنبي](https://github.com/OpenITI/0375AH/blob/master/data/0354Mutanabbi/0354Mutanabbi.Diwan/0354Mutanabbi.Diwan.JK007610-ara1) `openiti:0354Mutanabbi.Diwan.JK007610-ara1`  
   copy: [ديوان المتنبي](https://github.com/OpenITI/0375AH/blob/master/data/0354Mutanabbi/0354Mutanabbi.Diwan/0354Mutanabbi.Diwan.ShamAY0037830-ara1) `openiti:0354Mutanabbi.Diwan.ShamAY0037830-ara1`
@@ -56,7 +56,7 @@
 
 - **الرسالة** — محمد بن إدريس الشافعي `wishlist:W07`  
   library: الرسالة (محمد)  
-  work · uncertain · low (0.45) via `exact_title_author`: exact: same one-word title «رساله» / «رساله»; unknown: «محمد بن إدريس الشافعي» / «محمد» (only-common-tokens, ism:محمد); the authors are not shown to be one person nor two: the title alone cannot prove the work
+  work · uncertain · low (0.45) via `exact_title_author`: exact: same one-word title «الرسالة» / «الرسالة»; unknown: «محمد بن إدريس الشافعي» / «محمد» (only-common-tokens, ism:محمد); the authors are not shown to be one person nor two: the title alone cannot prove the work
 
 ## Missing · مفقود (2)
 
@@ -71,7 +71,7 @@
 
 | left | right | score | why |
 |---|---|---:|---|
-| الرسالة | الرسالة | 0.45 | exact: same one-word title «رساله» / «رساله»; unknown: «محمد بن إدريس الشافعي» / «محمد» (only-common-tokens, ism:محمد); the authors are not shown to be one person nor two: the title alone cannot prove the work |
+| الرسالة | الرسالة | 0.45 | exact: same one-word title «الرسالة» / «الرسالة»; unknown: «محمد بن إدريس الشافعي» / «محمد» (only-common-tokens, ism:محمد); the authors are not shown to be one person nor two: the title alone cannot prove the work |
 
 ## Library files identified by their bytes only (1)
 

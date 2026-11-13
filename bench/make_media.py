@@ -29,7 +29,7 @@ def terminal_svg(blocks: list[tuple[str, str]], path: Path, width: int = 1180) -
     lines: list[tuple[str, str]] = []
     for cmd, out in blocks:
         lines.append(("cmd", "$ " + cmd))
-        lines += [("out", x) for x in out.rstrip("\n").split("\n")]
+        lines += [("out", x if len(x) <= 128 else x[:126] + " …") for x in out.rstrip("\n").split("\n")]
         lines.append(("out", ""))
     lh, top = 22, 46
     h = top + lh * len(lines) + 10

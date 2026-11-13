@@ -1,2 +1,2 @@
 left	right	level	score	left_title	left_author	right_title	right_author	why	decision
-wishlist:W07	library:L07	work	0.45	الرسالة	محمد بن إدريس الشافعي	الرسالة	محمد	exact: same one-word title «رساله» / «رساله» | unknown: «محمد بن إدريس الشافعي» / «محمد» (only-common-tokens, ism:محمد) | the authors are not shown to be one person nor two: the title alone cannot prove the work	
+wishlist:W07	library:L07	work	0.45	الرسالة	محمد بن إدريس الشافعي	الرسالة	محمد	exact: same one-word title «الرسالة» / «الرسالة» | unknown: «محمد بن إدريس الشافعي» / «محمد» (only-common-tokens, ism:محمد) | the authors are not shown to be one person nor two: the title alone cannot prove the work	

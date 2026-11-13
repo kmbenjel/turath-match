@@ -166,7 +166,7 @@ print(m.explain())
 | Edition level: the same pairs | {SO_E_N:,} same-work pairs | {SO_E_P} | {SO_E_R} | |
 | A 500-book library against the OpenITI catalog | 500 × {L5_TARGETS:,} | {L5_P} | {L5_R} | {L5_SECS} s (1 process) |
 
-Recall counts every pair OpenITI files under one book URI, including volumes split into separate texts, hadith
+Method, every table and the kinds of error: [docs/benchmarks.md](docs/benchmarks.md). Recall counts every pair OpenITI files under one book URI, including volumes split into separate texts, hadith
 *juz'* collections filed under their compiler, and titles that share no word at all (*al-Wajīz* and *Tafsīr
 al-Wāḥidī*). Edition recall is low by design: about half of the records name no editor and no publisher, and those
 pairs are reported as `have_work` («edition not proven») instead of being guessed.
