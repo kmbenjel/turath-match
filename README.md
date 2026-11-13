@@ -198,8 +198,9 @@ pairs are reported as `have_work` («edition not proven») instead of being gues
   `work_id`).
 - **Bytes before labels.** Labels on upload sites can be wrong, and one archive.org item often holds several books,
   so exact sizes are counted per file, never per item.
-- **No catalog data in the repository.** Adapters read what you fetch or already have; tests use small hand-made
-  fixtures; Shamela is read from your own install only.
+- **Catalogs are read, not bundled.** Adapters read what you fetch or already have; tests use small hand-made
+  fixtures; Shamela is read from your own install only. The one exception is the small demo set listed under
+  [Licence and data](#licence-and-data).
 - **Rules you can read.** The matcher is a few hundred lines of explicit rules ([docs/matching.md](docs/matching.md)),
   not a trained model: every verdict traces back to a line of evidence.
 
@@ -217,6 +218,17 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). The most useful bug report is a pair of 
 
 ## Licence and data
 
-Code: MIT. The demo's archive.org records are metadata recorded from public items; its OpenITI rows come from the
-OpenITI release 2025.1.9 metadata (CC BY-NC-SA 4.0, [doi:10.5281/zenodo.17767721](https://doi.org/10.5281/zenodo.17767721)).
-turath-match ships no Shamela or Waqfeya data. To cite: [CITATION.cff](CITATION.cff).
+Code: MIT. The package (and the repository) carries one data set, the demo in
+[`src/turath_match/demo/`](src/turath_match/demo/README.md):
+
+| File | What it is | Licence |
+|---|---|---|
+| `library.csv`, `wishlist.csv` | a made-up 10-book library and a 10-work wish list | MIT, with the code |
+| `archive.jsonl` | 11 archive.org items: identifiers, titles, file names, sizes, checksums (metadata only, no books) | metadata of public items, recorded with `turath-match fetch archive` |
+| `openiti.tsv` | 27 rows of the OpenITI release 2025.1.9 metadata (selected columns) | CC BY-NC-SA 4.0, cited: Nigst, Romanov, Savant, Seydi, Verkinderen et al., [doi:10.5281/zenodo.17767721](https://doi.org/10.5281/zenodo.17767721) |
+
+The OpenITI rows keep their own licence, which is non-commercial and share-alike: they are not MIT, and they
+are why [turath-catalog](https://github.com/kmbenjel/turath-catalog), whose data are CC BY 4.0, links to OpenITI by
+identifier only. [`examples/demo-report/`](examples/demo-report/) is the demo's output, and
+[`bench/results/`](bench/results/) holds the benchmark counts with a few example pairs quoted from the OpenITI
+metadata. turath-match ships no Shamela or Waqfeya data. To cite: [CITATION.cff](CITATION.cff).
