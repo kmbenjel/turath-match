@@ -175,7 +175,9 @@ def main() -> int:
             }
             print(name, cname, res[f"{name} | {cname}"], flush=True)
             Path(a.out).parent.mkdir(parents=True, exist_ok=True)
-            Path(a.out).write_text(json.dumps(res, ensure_ascii=False, indent=1), "utf-8")  # partial results survive
+            Path(a.out).write_text(
+                json.dumps(res, ensure_ascii=False, indent=1), "utf-8"
+            )  # partial results survive
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(res, ensure_ascii=False, indent=1), "utf-8")
     return 0
