@@ -59,7 +59,7 @@ def file_evidence(a: Record, b: Record) -> tuple[str | None, list[Evidence], int
             Evidence(
                 "size",
                 f"{len(sized)} of {nb} file(s) of exactly the same size "
-                f"(e.g. {f.size:,} bytes: {f.name} = {sizes_b[f.size].name})",
+                f"(e.g. {f.size or 0:,} bytes: {f.name} = {sizes_b[f.size or 0].name})",
                 0.9,
             )
         )

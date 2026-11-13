@@ -161,8 +161,8 @@ def match_work(a: Record, b: Record) -> Match:
         # «المنتخب من كتاب الزهد والرقائق» is not built on every «الزهد»: a one-word base needs its author named
         base_rec, der = (b, ta) if tc.derived_side == "left" else (a, tb)
         base_words = min((len(f.core) for f in (tb if tc.derived_side == "left" else ta).forms), default=0)
-        own = {tok(x) for x in author_tokens(base_rec.author)}
-        if base_words <= 1 and not own & {w for f in der.forms for w in f.words}:
+        base_names = {tok(x) for x in author_tokens(base_rec.author)}
+        if base_words <= 1 and not base_names & {w for f in der.forms for w in f.words}:
             ev.append(
                 Evidence(
                     "derivation", "a one-word title, and the derived title does not name its author", -0.5

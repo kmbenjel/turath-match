@@ -17,7 +17,7 @@ try:  # pragma: no cover - exercised when arabic-bib is installed
 
     _HAS_AB = all(hasattr(_ab, n) for n in ("search_key", "title_key", "author_tokens", "match_authors"))
 except Exception:  # pragma: no cover
-    _ab = None
+    _ab = None  # type: ignore[assignment]
     _HAS_AB = False
 
 BACKEND = "arabic-bib" if _HAS_AB else "builtin"

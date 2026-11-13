@@ -60,7 +60,7 @@ class CsvSource:
         first = text.splitlines()[0] if text else ""
         delim = "\t" if first.count("\t") >= first.count(",") and "\t" in first else ","
         rows = csv.DictReader(text.splitlines(), delimiter=delim)
-        cols = _col(rows.fieldnames or [])
+        cols = _col(list(rows.fieldnames or []))
         if "title" not in cols:
             raise ValueError(f"{self.path}: no title column (looked for {', '.join(ALIASES['title'])})")
         for n, row in enumerate(rows, 1):

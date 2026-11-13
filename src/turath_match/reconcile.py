@@ -145,7 +145,7 @@ class Reconciliation:
                 ]
             )
             for t in self.targets:
-                m = t.edition or t.work or (t.files[0] if t.files else None)
+                best: Match | None = t.edition or t.work or (t.files[0] if t.files else None)
                 lib = t.library
                 w.writerow(
                     [
@@ -153,11 +153,11 @@ class Reconciliation:
                         t.target.title,
                         t.target.author,
                         t.status,
-                        m.confidence if m else "",
+                        best.confidence if best else "",
                         lib.id if lib else "",
                         lib.title if lib else "",
-                        m.method if m else "",
-                        " | ".join(e.detail for e in (m.evidence if m else [])),
+                        best.method if best else "",
+                        " | ".join(e.detail for e in (best.evidence if best else [])),
                     ]
                 )
         with paths["review"].open("w", encoding="utf-8", newline="") as fh:
