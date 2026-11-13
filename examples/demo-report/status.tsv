@@ -1,0 +1,11 @@
+target	title	author	status	confidence	library_id	library_title	method	evidence
+wishlist:W01	مقدمة ابن خلدون	عبد الرحمن بن محمد بن خلدون	have	high	L01	المقدمة	exact_title_author	exact: same one-word title «مقدمه» / «مقدمه» | same: «عبد الرحمن بن محمد بن خلدون» / «ابن خلدون» (shuhra:ابن خلدون)
+wishlist:W02	رسالة الغفران	أبو العلاء المعري	other_edition	high	L02	رسالة الغفران	fuzzy_title_author	different editors: «عائشة عبد الرحمن» / «كامل كيلاني» | years differ: 1950 / 1923 (another printing)
+wishlist:W03	ديوان المتنبي	أبو الطيب المتنبي	related_only	medium			fuzzy_title_author	related: «شرح» makes it a commentary «شعر متنبي» / «شرح شعر متنبي» | different: «أبو الطيب المتنبي» / «عبد الرحمن البرقوقي» (nisba-conflict:المتنبي!=البرقوقي) | commentary: the right record is built on the other
+wishlist:W04	طوق الحمامة	ابن حزم	have	high	L04	طوق الحمامة في الألفة والألاف	fuzzy_title_author	same editor: «إحسان عباس» / «إحسان عباس» | the editor is all the other record says about its edition
+wishlist:W05	كليلة ودمنة	عبد الله بن المقفع	have	high	L05	كتاب كليلة ودمنة	exact_title_author	"exact: same title words «كليله ودمنه» / «كليله ودمنه» | same: «عبد الله بن المقفع» / «""إبن المقفع، عبد الله""» (ism:عبد الله, nasab:المقفع) | the author of library:L05 is read from archive:AAlexandrina-144704, the source of its file (exact size)"
+wishlist:W06	البيان والتبيين	أبو عثمان عمرو بن بحر الجاحظ	other_edition	high	L06	البيان والتبيين	fuzzy_title_author	different publishers: «مكتبة الخانجي» / «المطبعة العلمية» | years differ: 1418 هـ / 1311 (another printing)
+wishlist:W07	الرسالة	محمد بن إدريس الشافعي	review	low	L07	الرسالة	exact_title_author	exact: same one-word title «رساله» / «رساله» | unknown: «محمد بن إدريس الشافعي» / «محمد» (only-common-tokens, ism:محمد) | the authors are not shown to be one person nor two: the title alone cannot prove the work
+wishlist:W08	الجامع المسند الصحيح = صحيح البخاري	محمد بن إسماعيل البخاري	have	high	L08	صحيح البخاري	exact_title_author	exact: same one-word title «صحيح» / «صحيح» | same: «محمد بن إسماعيل البخاري» / «البخاري» (nisba:البخاري)
+wishlist:W09	تهافت الفلاسفة	أبو حامد الغزالي	missing					
+wishlist:W10	الكامل في اللغة والأدب	المبرد	missing					

@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use turath-match in research, please cite it as below."
+title: "turath-match: evidence-based reconciliation of Arabic heritage book collections"
+type: software
+authors:
+  - family-names: Benjelloun
+    given-names: Khalid
+version: 0.1.0
+date-released: 2026-11-13
+license: MIT
+repository-code: "https://github.com/kmbenjel/turath-match"
+keywords:
+  - Arabic
+  - turath
+  - bibliography
+  - record linkage
+  - catalog reconciliation
+  - OpenITI
+  - digital humanities
+references:
+  - type: dataset
+    title: "OpenITI: a Machine-Readable Corpus of Islamicate Texts"
+    version: "2025.1.9"
+    doi: 10.5281/zenodo.17767721
+    authors:
+      - family-names: Nigst
+        given-names: Lorenz
+      - family-names: Romanov
+        given-names: Maxim
+      - family-names: Savant
+        given-names: Sarah Bowen
+      - family-names: Seydi
+        given-names: Masoumeh
+      - family-names: Verkinderen
+        given-names: Peter

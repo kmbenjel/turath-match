@@ -1,0 +1,19 @@
+name: Bug report
+description: A crash, a wrong file, an adapter that fails
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: cmd
+    attributes:
+      label: Command and output
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: turath-match --version

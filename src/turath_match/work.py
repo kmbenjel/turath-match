@@ -8,6 +8,8 @@ the title agrees but nothing says who wrote one side, the pair is *uncertain* an
 
 from __future__ import annotations
 
+import re
+
 from .models import (
     DIFFERENT,
     EXACT_TITLE_AUTHOR,
@@ -19,7 +21,7 @@ from .models import (
     Match,
     Record,
 )
-from .text import author_tokens, match_authors
+from .text import author_tokens, match_authors, parse_death, search_key
 from .titles import analyse, compare_titles, tok
 
 # score of «same work» by how the titles agree, when the authors agree
@@ -42,8 +44,52 @@ _UNKNOWN_SCORE = {
 }
 
 
-def _author_line(r: Record) -> str:
-    return r.author + (f" ت {r.death}" if r.death and str(r.death) not in r.author else "")
+DEATH_SLACK = 12  # years: beyond this, two death dates are two people
+_DEATH_NOTE = re.compile(
+    r"[(\[]?\s*(?:ت|المتوفى|المتوفي|توفي)\s*[:.]?\s*[\d٠-٩]{1,4}\s*(?:هـ|ه)?\s*[)\]]?|[(\[][^)\]]*\d[^)\]]*[)\]]"
+)
+
+
+def strip_death(name: str) -> str:
+    """The name without its death note: «… (المتوفى: 1345هـ)», «… ت 728 هـ», «… (28 - 110 ه)»."""
+    return " ".join(_DEATH_NOTE.sub(" ", name or "").split())
+
+
+_ORDER = {"same": 2, "unknown": 1, "different": 0}
+
+
+def _forms(author: str) -> list[str]:
+    """«الجاحظ ؛ أبو عثمان عمرو بن بحر» -> the name forms a catalog gives for one person (at most three)."""
+    out = [x.strip() for x in re.split(r"[؛;]", author or "") if x.strip()]
+    return out[:3] or [""]
+
+
+def agree_authors(a: str, b: str) -> tuple[str, float, tuple[str, ...]]:
+    """The best agreement over every pair of name forms: one form that proves the person is enough."""
+    best: tuple[str, float, tuple[str, ...]] | None = None
+    for fa in _forms(a):
+        for fb in _forms(b):
+            m = match_authors(fa, fb)
+            cand = (m.verdict, m.score, tuple(m.reasons))
+            if best is None or (_ORDER[cand[0]], cand[1]) > (_ORDER[best[0]], best[1]):
+                best = cand
+    assert best is not None
+    if best[0] == "unknown" and (len(_forms(a)) > 1 or len(_forms(b)) > 1):
+        whole = match_authors(" ".join(_forms(a)), " ".join(_forms(b)))
+        if whole.verdict == "same":
+            best = (whole.verdict, whole.score, tuple(whole.reasons))
+    return best
+
+
+GENERIC_ADJ = {
+    tok(w)
+    for w in search_key(
+        "الأدبية الكاملة المختارة الفلسفية الكلامية الفقهية السياسية الصغرى الكبرى المجموعة"
+    ).split()
+}
+COLLECTION = {
+    tok(w) for w in search_key("رسائل الرسائل مجموع مجموعة مؤلفات الأعمال أعمال آثار موسوعة ديوان").split()
+}
 
 
 def match_work(a: Record, b: Record) -> Match:
@@ -68,30 +114,34 @@ def match_work(a: Record, b: Record) -> Match:
     ev.append(Evidence("title", f"{tc.kind}: {tc.detail}", tw))
 
     # who wrote it: the author fields, the death years, and an author the title itself names («… للبيهقي»)
-    if a.death and b.death and abs(a.death - b.death) > 2:
-        am_verdict, am_score, reasons = "different", 0.0, (f"death-conflict:{a.death}!={b.death}",)
-    else:
-        am = match_authors(_author_line(a), _author_line(b))
-        am_verdict, am_score, reasons = am.verdict, am.score, am.reasons
-        if am_verdict == "unknown":
-            for own, other, side in ((ta, b, "left"), (tb, a, "right")):
-                if own.attribution and other.author:
-                    m2 = match_authors(" ".join(own.attribution), other.author)
-                    if m2.verdict == "same":
-                        am_verdict, am_score = "same", 0.75
-                        reasons = (f"{side} title names the author: {' '.join(sorted(own.attribution))}",)
-    if (
-        am_verdict == "unknown"
-        and a.death
-        and b.death
-        and abs(a.death - b.death) <= 1
-        and author_tokens(a.author) & author_tokens(b.author)
-    ):
-        # «الشافعي» alone is a madhhab nisba shared by thousands; with the same death year it is one man
-        am_verdict, am_score = "same", 0.75
-        reasons = (*reasons, f"same death year {a.death} and a shared name")
-    if a.death and b.death and am_verdict == "same" and abs(a.death - b.death) <= 2:
-        ev.append(Evidence("death", f"death years agree: {a.death} / {b.death} AH", 0.2))
+    da, db = a.death or parse_death(a.author), b.death or parse_death(b.author)
+    death_doubt = False
+    am_verdict, am_score, reasons = agree_authors(strip_death(a.author), strip_death(b.author))
+    if am_verdict == "unknown":
+        for own, other, side in ((ta, b, "left"), (tb, a, "right")):
+            if own.attribution and other.author:
+                m2 = match_authors(" ".join(own.attribution), strip_death(other.author))
+                if m2.verdict == "same":
+                    am_verdict, am_score = "same", 0.75
+                    reasons = (f"{side} title names the author: {' '.join(sorted(own.attribution))}",)
+    if da and db:
+        gap = abs(da - db)
+        if gap <= 2:
+            if am_verdict == "unknown" and author_tokens(a.author) & author_tokens(b.author) and gap <= 1:
+                # «الشافعي» alone is a madhhab nisba shared by thousands; with the same death year it is one man
+                am_verdict, am_score = "same", 0.75
+                reasons = (*reasons, f"same death year {da} and a shared name")
+            if am_verdict == "same":
+                ev.append(Evidence("death", f"death years agree: {da} / {db} AH", 0.2))
+        elif gap <= DEATH_SLACK and am_verdict == "same" and am_score >= 0.9:
+            # catalogs disagree on uncertain death dates (أبو الفرج الأصبهاني: 356 or 362); the names decide
+            ev.append(
+                Evidence("death", f"death years differ by {gap} ({da} / {db} AH); the full names agree", -0.3)
+            )
+            am_score, death_doubt = 0.7, True
+        else:
+            am_verdict, am_score = "different", 0.0
+            reasons = (*reasons, f"death-conflict:{da}!={db}")
     aw = {"same": am_score, "different": -1.0, "unknown": 0.0}[am_verdict]
     ev.append(
         Evidence(
@@ -114,6 +164,18 @@ def match_work(a: Record, b: Record) -> Match:
     key = (tc.kind, tc.score)
     if am_verdict == "same":
         score = _SAME_SCORE.get(key, 0.6) - (0.05 if am_score < 0.8 else 0.0)
+        if death_doubt:
+            score = min(score, 0.8)  # two death years: a person confirms
+        core = [w for f in ta.forms[:1] for w in f.core if w not in names]
+        if (
+            core
+            and core[0] in COLLECTION
+            and core[0] != "شعر"
+            and all(w in COLLECTION | GENERIC_ADJ for w in core[1:])
+        ):
+            # «رسائل الجاحظ», «مجموع الفتاوى»: a collection's name, which many single works also carry
+            ev.append(Evidence("title", "a collection title by this author: it does not name one work", -0.3))
+            return Match(a, b, "work", UNCERTAIN, min(score, 0.6), method, ev)
         return Match(a, b, "work", SAME, score, method, ev)
     if am_verdict == "different":
         ev.append(Evidence("author", "same title by another author: another work", -1.0))

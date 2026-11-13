@@ -30,7 +30,11 @@ def tok(w: str) -> str:
 
 
 def _words(s: str) -> list[str]:
-    return [tok(w) for w in search_key(s).split() if w not in FUNC and len(w) > 1]
+    return [
+        tok(w)
+        for w in search_key(s).split()
+        if w not in FUNC and not (w[:1] == "و" and w[1:] in FUNC) and len(w) > 1
+    ]
 
 
 FUNC = set(search_key("في على من عن إلى و ما أو مع التي الذي منه منها فيه فيها").split())
@@ -61,6 +65,9 @@ for _rel, _ws in {
     for _w in search_key(_ws).split():
         RELATIONS[tok(_w)] = _rel
 
+LEAD = {
+    tok(w) for w in search_key("كتاب مسألة مسالة جزء").split()
+}  # «مسألة الاحتجاج بالشافعي» = «الاحتجاج بالشافعي»
 PART_INTRO = {tok(w) for w in search_key("رواية برواية السفر الجزء القسم المجلد").split()}
 SIZE = {tok(w) for w in search_key("الكبرى الكبير الصغرى الصغير الوسيط الأوسط الوجيز").split()}
 JOINERS = re.compile(
@@ -172,11 +179,13 @@ def analyse(title: str, author: str = "") -> TitleInfo:
         if not ws or all(w in names for w in ws):  # «- الضياء المقدسي»: the author, not the title
             continue
         head += " " + p  # «- رواية أبي مصعب», «- السفر الثاني»: part of what the title names
-    for alt in head.split("="):
+    for alt in re.split(r"=|\s(?:المسمى|المسماة|المسمي|المسماه|المعروف ب|المشهور ب)\s", head):
         pieces = JOINERS.split(" " + alt + " ")
         main = pieces[0]
         info.joined.extend(x.strip() for x in pieces[1:] if x.strip())
         ws = _words(main)
+        while len(ws) > 2 and ws[0] in LEAD:  # «جزء فيه حديث لوين» = «حديث لوين», «مسألة الاحتجاج …»
+            ws = ws[1:]
         if len(ws) > 1 and ws[0] == "كتاب":
             ws = ws[1:]
         ws, attr = _strip_attribution(ws, names)
@@ -208,6 +217,10 @@ def _compare_forms(a: TitleForm, b: TitleForm, names: frozenset[str] = frozenset
         ra, rb = [x for x in ca if x not in names], [x for x in cb if x not in names]
         if ra and rb and (len(ra) < len(ca) or len(rb) < len(cb)):
             ca, cb = ra, rb
+    if (
+        "".join(ca) == "".join(cb) and ca != cb
+    ):  # «ومايتبعها» / «وما يتبعها»: the same letters, spaced otherwise
+        ca = cb
     sa, sb = set(ca), set(cb)
     miss_b = [x for x in ca if not has(x, sb)]  # in a, not in b
     miss_a = [x for x in cb if not has(x, sa)]
@@ -237,12 +250,25 @@ def _compare_forms(a: TitleForm, b: TitleForm, names: frozenset[str] = frozenset
             return TitleComparison("head", 0.55, f"one-word title is the start of the other {joined}")
         cap = 0.7 if (za ^ zb) else 0.85
         return TitleComparison("head", cap, f"one title is the start of the other (a subtitle) {joined}")
+    if not rels and len(short) >= 3 and short[0] == long_[0] and all(has(x, set(long_)) for x in short):
+        # every word of the shorter title is in the longer one, in a title that starts alike: a fuller title
+        return TitleComparison("head", 0.85, f"the longer title holds every word of the shorter {joined}")
     if rels:
         covered = [x for x in short if has(x, set(long_)) or any(has(y, {x}) for y in long_)]
         if len(covered) >= max(1, len(short) - (1 if len(short) >= 4 else 0)):
             words = "/".join(e for e in extra if base(e) in RELATIONS)
             return TitleComparison("related", 0.7, f"«{words}» makes it a {rels[0]} {joined}", rels[0], side)
-    if len(ca) >= 3 and len(cb) >= 3 and len(miss_a) <= 1 and len(miss_b) <= 1 and ca[0] == cb[0]:
+    slack = max(
+        1, min(len(ca), len(cb)) // 4
+    )  # long titles: one word in four may be spelt or cut differently
+    if (
+        len(ca) >= 3
+        and len(cb) >= 3
+        and len(miss_a) <= slack
+        and len(miss_b) <= slack
+        and ca[0] == cb[0]
+        and (slack == 1 or ca[1] == cb[1])
+    ):
         if any(base(x) in RELATIONS for x in miss_a + miss_b):
             return TitleComparison("none", 0.3, f"titles differ by a relation word {joined}")
         return TitleComparison("fuzzy", 0.7, f"titles differ by one word {joined}")

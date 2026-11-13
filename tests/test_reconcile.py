@@ -140,3 +140,25 @@ def test_write_outputs_and_reports(tmp_path):
     h = ht.read_text("utf-8")
     assert h.startswith("<!doctype html>") and "prefers-color-scheme" in h and "AAlexandrina-164114" in h
     assert to_markdown(rec).count("## ") >= 6 and "<script" not in to_html(rec)
+
+
+def test_outputs_follow_the_json_schemas(tmp_path):
+    schema = resources.files("turath_match") / "schema"
+    m = json.loads((schema / "match.schema.json").read_text("utf-8"))
+    c = json.loads((schema / "crosswalk.schema.json").read_text("utf-8"))
+    rec = reconcile(*_demo())
+    paths = rec.write(tmp_path)
+
+    def check(obj, sch):  # the subset of JSON Schema these files use: required keys and enums
+        for k in sch.get("required", []):
+            assert k in obj, k
+        for k, spec in sch.get("properties", {}).items():
+            if k in obj and "enum" in spec:
+                assert obj[k] in spec["enum"], (k, obj[k])
+
+    for line in paths["matches"].read_text("utf-8").splitlines():
+        check(json.loads(line), m)
+    for line in paths["crosswalk"].read_text("utf-8").splitlines():
+        d = json.loads(line)
+        check(d, c)
+        assert d["cluster_id"].startswith("w_") and len(d["cluster_id"]) == 12

@@ -1,0 +1,33 @@
+name: CI
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: kmbenjel/arabic-bib
+          path: arabic-bib
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install
+        run: |
+          mv arabic-bib ../arabic-bib
+          uv venv
+          uv pip install -e ../arabic-bib -e ".[dev]"
+      - name: Lint
+        run: |
+          uv run --no-sync ruff check src tests
+          uv run --no-sync ruff format --check src tests
+      - name: Test
+        run: uv run --no-sync pytest -q --cov --cov-report=term --cov-fail-under=90
+      - name: Demo
+        run: uv run --no-sync turath-match demo -o /tmp/demo

@@ -71,7 +71,11 @@ def test_reconcile_scan_export_provenance(tmp_path, capsys):
         == 0
     )
     assert (tmp_path / "p.tsv").read_text("utf-8").count("archive:k1") == 2
-    assert cli.main(["dups", str(lib), "--json", str(tmp_path / "d.json")]) == 0
+    plan = tmp_path / "dedupe.tsv"
+    assert cli.main(["dups", str(lib), "--json", str(tmp_path / "d.json"), "--plan", str(plan)]) == 0
+    rows = plan.read_text("utf-8").splitlines()
+    assert rows[1] == "action\tfrom\tto\treason" and rows[2].startswith("delete\t")
+    assert "duplicate of" in rows[2] and len(rows) == 3
     assert len(json.loads((tmp_path / "d.json").read_text())[0]["paths"]) == 2
 
 

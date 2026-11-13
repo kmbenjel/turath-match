@@ -14,3 +14,4 @@ turath-demo/
 turath-out/
 bench/data/
 bench/out/
+*.class

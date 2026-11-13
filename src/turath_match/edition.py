@@ -20,9 +20,22 @@ def _years(s: str) -> set[int]:
     return {int(y) for y in re.findall(r"\b(\d{3,4})\b", to_ascii_digits(s or ""))}
 
 
+_NOT_EDITOR = re.compile(r"مخطوط|نشر في برنامج|بدون|غير معروف|لا يوجد")
+_PLACE_TAIL = re.compile(r"\s*(?:[،,]|\s-\s|\(|\s/\s).*$")
+
+
 def _hint(r: Record) -> tuple[str, str]:
     info = analyse(r.title, r.author)
-    return (r.editor or info.editor_hint, r.publisher or info.publisher_hint)
+    ed = r.editor or info.editor_hint
+    if _NOT_EDITOR.search(ed):  # a note in the editor field («مخطوط نشر في برنامج …»), not a person
+        ed = ""
+    return (ed, r.publisher or info.publisher_hint)
+
+
+def publisher_core(p: str) -> str:
+    """«دار طيبة، الرياض - السعودية» -> «دار طيبة»: the house without its place, date or notes."""
+    core = _PLACE_TAIL.sub("", p or "").strip()
+    return core or (p or "").strip()
 
 
 def _flags(r: Record) -> set[str]:
@@ -77,6 +90,8 @@ def match_edition(a: Record, b: Record) -> Match:
         ev.append(Evidence("editor", f"different editors: «{ea}» / «{eb}»", -1.0))
         neg += 1.0
     p = same_publisher(pa, pb)
+    if p is False and same_publisher(publisher_core(pa), publisher_core(pb)):
+        p = True  # the same house, written with and without its city
     if p is True:
         ev.append(Evidence("publisher", f"same publisher: «{pa}» / «{pb}»", 0.3))
         pos += 0.3
@@ -104,6 +119,11 @@ def match_edition(a: Record, b: Record) -> Match:
             ev.append(Evidence("flag", f"only one side is a {flag}", -0.6))
             neg += 0.6
 
+    agreed = sum(1 for e in ev if e.weight > 0)
+    if neg == 0 and agreed >= 2:
+        # every field both records give agrees, and there are at least two of them (publisher and year, …)
+        ev.append(Evidence("edition", f"all {agreed} edition fields both records give agree", 0.0))
+        return Match(a, b, "edition", SAME, 0.88 if s is True else 0.85, FUZZY_TITLE_AUTHOR, ev)
     if neg >= 0.5:
         return Match(a, b, "edition", DIFFERENT, min(0.95, 0.5 + neg / 2), FUZZY_TITLE_AUTHOR, ev)
     if s is True and (p is True or (a.volumes and a.volumes == b.volumes)):

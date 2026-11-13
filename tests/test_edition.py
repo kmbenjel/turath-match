@@ -71,3 +71,23 @@ def test_year_disagreement_is_another_printing():
 def test_similar_publishers_are_not_one():
     m = match_edition(R("x", publisher="دار الفكر"), R("x", publisher="دار الفكر العربي"))
     assert m.verdict == DIFFERENT
+
+
+def test_publisher_with_and_without_city():
+    m = match_edition(
+        R("x", editor="الحسين آيت سعيد", publisher="دار طيبة - الرياض"),
+        R("x", editor="د الحسين آيت سعيد", publisher="دار طيبة، الرياض - السعودية"),
+    )
+    assert m.verdict == SAME
+
+
+def test_note_in_editor_field_is_not_an_editor():
+    m = match_edition(R("x", editor="مخطوط نشر في برنامج جوامع الكلم"), R("x", editor="نبيل جرار"))
+    assert m.verdict != DIFFERENT
+
+
+def test_two_agreeing_fields_without_editor():
+    m = match_edition(
+        R("x", publisher="مطبعة الصاوي", year="1355 هـ"), R("x", publisher="مطبعة الصاوي", year="١٣٥٥ هـ")
+    )
+    assert m.verdict == SAME and m.status == "match"

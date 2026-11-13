@@ -212,6 +212,22 @@ def cmd_dups(a: argparse.Namespace) -> int:
         print(f"{g.size:>12,}  {g.method:<13} {len(g.paths)} copies")
         for p in g.paths:
             print(f"              {p}")
+    if a.plan:
+        root = Path(a.folder)
+        with open(a.plan, "w", encoding="utf-8", newline="") as fh:
+            fh.write(f"#planfs name dedupe-{time.strftime('%Y%m%d')}\naction\tfrom\tto\treason\n")
+            for g in groups:
+                keep, *rest = sorted(g.paths, key=lambda p: (len(p), p))
+                for p in rest:
+                    why = "same SHA-256" if g.method == "hash" else "same size and five sampled 64 KB windows"
+                    fh.write(
+                        f"delete\t{Path(p).relative_to(root)}\t\tduplicate of {Path(keep).relative_to(root)} "
+                        f"({g.size} bytes, {why})\n"
+                    )
+        print(
+            f"planfs plan -> {a.plan} (preview: planfs plan {a.plan}; deletes go to quarantine)",
+            file=sys.stderr,
+        )
     if a.json:
         Path(a.json).write_text(
             json.dumps([g.to_dict() for g in groups], ensure_ascii=False, indent=1), "utf-8"
@@ -400,6 +416,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--deep", action="store_true", help="confirm each group with a full SHA-256")
     sp.add_argument("--workers", type=int, default=4)
     sp.add_argument("--json")
+    sp.add_argument(
+        "--plan", help="write a planfs plan that deletes every copy but one (nothing is deleted here)"
+    )
 
     sp = add(
         "fetch",

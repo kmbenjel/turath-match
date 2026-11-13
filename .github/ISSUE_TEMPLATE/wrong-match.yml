@@ -1,0 +1,25 @@
+name: Wrong match
+description: turath-match matched two different works or editions, or missed a real match
+labels: [matching]
+body:
+  - type: textarea
+    id: pair
+    attributes:
+      label: The two records
+      description: Title and author (and editor/publisher if it is about editions) of each side.
+      placeholder: |
+        left:  الزهد | أحمد بن حنبل
+        right: الزهد | عبد الله بن المبارك
+    validations:
+      required: true
+  - type: textarea
+    id: explain
+    attributes:
+      label: Output of turath-match explain
+      render: text
+      description: 'turath-match explain "title|author" "title|author"'
+  - type: input
+    id: expected
+    attributes:
+      label: The right answer
+      placeholder: different works (same title, two authors)

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/kmbenjel/turath-match/schema/crosswalk.schema.json",
+  "title": "turath-match work cluster (one line of crosswalk.jsonl)",
+  "type": "object",
+  "required": ["cluster_id", "title_ar", "author_ar", "ext_ids", "members"],
+  "properties": {
+    "cluster_id": {"type": "string", "pattern": "^w_[0-9a-f]{10}$",
+                   "description": "w_ + 10 hex of sha1(title_key|author_key): the turath-catalog work_id recipe"},
+    "title_ar": {"type": "string"}, "author_ar": {"type": "string"},
+    "death_ah": {"type": ["integer", "null"]},
+    "openiti_uri": {"type": "string", "description": "book-level OpenITI URI when a member carries one"},
+    "ext_ids": {"type": "string", "description": "scheme:id;scheme:id … (library records left out)"},
+    "members": {"type": "array", "items": {"type": "object", "required": ["scheme", "id"], "properties": {
+      "scheme": {"type": "string"}, "id": {"type": "string"}, "url": {"type": "string"},
+      "editors": {"type": "string"}, "publisher": {"type": "string"}, "place": {"type": "string"},
+      "year": {"type": "string"}, "volumes": {"type": ["integer", "null"]}, "size_bytes": {"type": ["integer", "null"]},
+      "files": {"type": "array", "items": {"type": "object", "properties": {
+        "name": {"type": "string"}, "size": {"type": "integer"}, "url": {"type": "string"},
+        "md5": {"type": "string"}, "sha1": {"type": "string"}}}}}}}
+  }
+}

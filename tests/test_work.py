@@ -119,3 +119,54 @@ def test_work_id_recipe_is_stable():
         work_id("صحيح البخاري", "البخاري")
         == "w_" + hashlib.sha1("صحيح البخاري|البخاري".encode()).hexdigest()[:10]
     )
+
+
+def test_almusamma_is_an_alternative_title():
+    m = match_work(
+        R("تفسير القشيري المسمى لطائف الإشارات", "القشيري"), R("لطائف الإشارات", "عبد الكريم القشيري")
+    )
+    assert m.verdict == SAME and m.status == MATCH
+
+
+def test_fuller_title_holding_every_word():
+    m = match_work(
+        R("كشف المخدرات والرياض المزهرات لشرح أخصر المختصرات", "البعلي"),
+        R("كشف المخدرات لشرح أخصر المختصرات", "عبد الرحمن بن عبد الله البعلي"),
+    )
+    assert m.verdict == SAME
+
+
+def test_leading_masala_and_juz_fihi():
+    assert (
+        match_work(
+            R("مسألة الاحتجاج بالشافعي", "الخطيب البغدادي"), R("الاحتجاج بالشافعي", "الخطيب البغدادي")
+        ).verdict
+        == SAME
+    )
+    assert match_work(R("جزء فيه حديث لوين", "لوين"), R("حديث لوين", "لوين")).verdict == SAME
+
+
+def test_collection_title_never_matches_alone():
+    m = match_work(R("رسائل الجاحظ", "الجاحظ"), R("رسائل الجاحظ", "الجاحظ"))
+    assert m.verdict == UNCERTAIN and m.status == REVIEW
+    assert match_work(R("الرسائل الأدبية", "الجاحظ"), R("الرسائل الأدبية", "الجاحظ")).status == REVIEW
+
+
+def test_death_slack_with_full_names():
+    m = match_work(
+        R("الإماء الشواعر", "أبو الفرج الأصبهاني", death=356),
+        R("الإماء الشواعر", "أبو الفرج الأصبهاني", death=362),
+    )
+    assert m.verdict == SAME and m.status == REVIEW
+    assert any(e.kind == "death" and e.weight < 0 for e in m.evidence)
+
+
+def test_death_note_inside_the_name():
+    m = match_work(R("نور اليقين", "محمد الخضري (المتوفى: 1345هـ)"), R("نور اليقين", "محمد الخضري ت 1345"))
+    assert m.verdict == SAME
+
+
+def test_long_title_tolerates_one_word_in_four():
+    a = R("القواعد والفوائد الأصولية ومايتبعها من الأحكام الفرعية", "ابن اللحام")
+    b = R("القواعد والفوائد الأصولية وما يتبعها من الأحكام الفرعية", "ابن اللحام")
+    assert match_work(a, b).verdict == SAME

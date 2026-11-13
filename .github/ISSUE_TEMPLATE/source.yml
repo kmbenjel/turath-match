@@ -1,0 +1,14 @@
+name: New source
+description: Propose an adapter for another catalog
+labels: [source]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Catalog
+  - type: textarea
+    id: access
+    attributes:
+      label: How its metadata can be read (API, dump, local database) and its terms of use
+    validations:
+      required: true
