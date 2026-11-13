@@ -21,7 +21,7 @@ jobs:
       - name: Install
         run: |
           mv arabic-bib ../arabic-bib
-          uv venv
+          uv venv --clear
           uv pip install -e ../arabic-bib -e ".[dev]"
       - name: Lint
         run: |
