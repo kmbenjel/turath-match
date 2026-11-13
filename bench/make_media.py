@@ -61,14 +61,19 @@ def terminal_svg(blocks: list[tuple[str, str]], path: Path, width: int = 1180) -
 def evidence_svg(path: Path) -> None:
     """The three levels and what each one needs, as a static diagram (README and docs)."""
     W, H = 1180, 430
-    box = lambda x, y, w, h, fill, stroke: (
-        f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="12" '  # noqa: E731
-        f'fill="{fill}" stroke="{stroke}" stroke-width="1.5"/>'
-    )
-    t = lambda x, y, s, size=15, weight="400", fill="#1f2328", anchor="start": (  # noqa: E731
-        f'<text x="{x}" y="{y}" font-size="{size}" font-weight="{weight}" fill="{fill}" text-anchor="{anchor}">'
-        f"{html.escape(s)}</text>"
-    )
+
+    def box(x: int, y: int, w: int, h: int, fill: str, stroke: str) -> str:
+        return (
+            f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="12" '
+            f'fill="{fill}" stroke="{stroke}" stroke-width="1.5"/>'
+        )
+
+    def t(x: int, y: int, s: str, size: float = 15, weight: str = "400", fill: str = "#1f2328") -> str:
+        return (
+            f'<text x="{x}" y="{y}" font-size="{size}" font-weight="{weight}" fill="{fill}">'
+            f"{html.escape(s)}</text>"
+        )
+
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" '
         f'font-family="Noto Naskh Arabic, Noto Sans, DejaVu Sans, sans-serif">',
