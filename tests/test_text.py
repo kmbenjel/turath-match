@@ -18,8 +18,17 @@ def test_keys(fallback):
     assert fallback.author_key("ابن حجر العسقلاني") == "العسقلاني حجر"
 
 
-@pytest.mark.parametrize("s,y", [("ابن تيمية ت 728 هـ", 728), ("(المتوفى: ٧٢٨هـ)", 728), ("661-728", 728),
-                                 ("728", 728), ("", None), ("بلا تاريخ", None)])
+@pytest.mark.parametrize(
+    "s,y",
+    [
+        ("ابن تيمية ت 728 هـ", 728),
+        ("(المتوفى: ٧٢٨هـ)", 728),
+        ("661-728", 728),
+        ("728", 728),
+        ("", None),
+        ("بلا تاريخ", None),
+    ],
+)
 def test_parse_death(fallback, s, y):
     assert fallback.parse_death(s) == y
 

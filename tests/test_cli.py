@@ -74,8 +74,9 @@ def test_reconcile_scan_export_provenance(tmp_path, capsys):
     plan = tmp_path / "dedupe.tsv"
     assert cli.main(["dups", str(lib), "--json", str(tmp_path / "d.json"), "--plan", str(plan)]) == 0
     rows = plan.read_text("utf-8").splitlines()
-    assert rows[1] == "action\tfrom\tto\treason" and rows[2].startswith("delete\t")
-    assert "duplicate of" in rows[2] and len(rows) == 3
+    assert rows[1] == f"#planfs target {lib.resolve()}"  # planfs finds the folder without -t
+    assert rows[2] == "action\tfrom\tto\treason" and rows[3].startswith("delete\t")
+    assert "duplicate of" in rows[3] and len(rows) == 4
     assert len(json.loads((tmp_path / "d.json").read_text())[0]["paths"]) == 2
 
 

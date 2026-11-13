@@ -215,7 +215,9 @@ def cmd_dups(a: argparse.Namespace) -> int:
     if a.plan:
         root = Path(a.folder)
         with open(a.plan, "w", encoding="utf-8", newline="") as fh:
-            fh.write(f"#planfs name dedupe-{time.strftime('%Y%m%d')}\naction\tfrom\tto\treason\n")
+            # the rows are relative to the scanned folder, so the plan names it: `planfs plan FILE` needs no -t
+            fh.write(f"#planfs name dedupe-{time.strftime('%Y%m%d')}\n#planfs target {root.resolve()}\n")
+            fh.write("action\tfrom\tto\treason\n")
             for g in groups:
                 keep, *rest = sorted(g.paths, key=lambda p: (len(p), p))
                 for p in rest:
