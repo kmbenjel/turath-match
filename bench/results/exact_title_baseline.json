@@ -1,0 +1,18 @@
+{
+ "records": 12688,
+ "books": 8233,
+ "title | identical values": {
+  "true_positive": 4036,
+  "false_positive": 2192,
+  "precision": 0.648,
+  "recall": 0.5564,
+  "positive_pairs": 7254
+ },
+ "title + author | identical values": {
+  "true_positive": 3135,
+  "false_positive": 1114,
+  "precision": 0.7378,
+  "recall": 0.4322,
+  "positive_pairs": 7254
+ }
+}

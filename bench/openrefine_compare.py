@@ -136,6 +136,11 @@ def main() -> int:
         action="store_true",
         help="also run Levenshtein on the title + author column (no result after 20 minutes on the full set)",
     )
+    ap.add_argument(
+        "--baseline-only",
+        action="store_true",
+        help="only the exact-equality baseline (identical title, identical title + author): no OpenRefine needed",
+    )
     a = ap.parse_args()
     recs = [r for r in OpenITI(a.metadata).records() if r.author and r.title]
     if a.sample:
@@ -151,16 +156,22 @@ def main() -> int:
     tsv = "title\ttitle_author\n" + "".join(
         f"{t}\t{ta}\n" for t, ta in zip(keys["title"], keys["title + author"], strict=True)
     )
-    rf = Refine(a.url)
-    pid = rf.create(f"openiti-{int(time.time())}", tsv)
-    res: dict[str, dict] = {"records": len(recs), "books": len(set(truth)), "openrefine": a.url}
-    for col, name in (("title", "title"), ("title_author", "title + author")):
-        vals = keys[name]
+    res: dict[str, dict] = {"records": len(recs), "books": len(set(truth))}
+    for name, vals in keys.items():  # the baseline: records whose value is character for character the same
         by_val: dict[str, list[int]] = defaultdict(list)
         for i, v in enumerate(vals):
             by_val[v].append(i)
-        identical = [ids for ids in by_val.values() if len(ids) > 1]
-        res[f"{name} | identical values"] = score(identical, truth)
+        res[f"{name} | identical values"] = score([ids for ids in by_val.values() if len(ids) > 1], truth)
+    if a.baseline_only:
+        Path(a.out).parent.mkdir(parents=True, exist_ok=True)
+        Path(a.out).write_text(json.dumps(res, ensure_ascii=False, indent=1), "utf-8")
+        print(json.dumps(res, ensure_ascii=False, indent=1))
+        return 0
+    rf = Refine(a.url)
+    pid = rf.create(f"openiti-{int(time.time())}", tsv)
+    res["openrefine"] = a.url  # type: ignore[assignment]
+    for col, name in (("title", "title"), ("title_author", "title + author")):
+        vals = keys[name]
         for cname, cl in CLUSTERERS.items():
             if cl["type"] == "knn" and name == "title + author" and not a.slow:
                 res["note"] = (

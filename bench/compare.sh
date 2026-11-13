@@ -15,6 +15,12 @@ mkdir -p bench/data bench/out
 echo "== turath-match on OpenITI (work level)"
 $PY bench/openiti_works.py bench/data/openiti.tsv --relations bench/data/book_relations.json --out bench/out/openiti_works.json
 
+echo "== held out: Wikidata records against OpenITI (labelled by the Shamela id both carry)"
+$PY bench/wikidata_heldout.py bench/data/openiti.tsv --out bench/out/wikidata_heldout.json
+
+echo "== baseline: exact title equality on the same records (no OpenRefine needed)"
+$PY bench/openrefine_compare.py bench/data/openiti.tsv --baseline-only --out bench/out/exact_title_baseline.json
+
 echo "== OpenRefine $OR_VERSION on the same records"
 if [ ! -x "bench/data/openrefine-$OR_VERSION/refine" ]; then
   curl -sSL -o bench/data/openrefine.tar.gz \

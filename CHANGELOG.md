@@ -23,4 +23,5 @@ All notable changes to this project are documented here. The format follows
 - `reconcile` with statuses have / partial / have_work / other_edition / related_only / review / missing,
   copies for what is missing, a review list whose decisions are kept, a work crosswalk, Markdown and HTML reports.
 - `demo`, `explain`, `scan`, `export`, `provenance`, `dups`, `fetch`, `shamela-cards` commands.
-- Benchmarks on public data (OpenITI) and a head-to-head with OpenRefine 3.10.1.
+- Benchmarks on public data (OpenITI), a held-out check on Wikidata records, an exact-title baseline and a
+  head-to-head with OpenRefine 3.10.1.

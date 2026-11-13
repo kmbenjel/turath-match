@@ -25,8 +25,9 @@ list, and your decisions on it are kept.
 ## Why turath-match? How it compares
 
 Measured on public data: the 12,688 Arabic text versions of OpenITI 2025.1.9 that carry a title and an author, whose book URIs (curated by
-the KITAB project) say which versions are one work. The matcher never sees the URIs. Every number below comes from
-[`bench/compare.sh`](bench/compare.sh), run on a 32-vCPU server on 2026-11-13.
+the KITAB project) say which versions are one work. The matcher never sees the URIs. The matching rules were
+developed on this same OpenITI release, so the table below is the development set; the held-out result follows it.
+Every number comes from [`bench/compare.sh`](bench/compare.sh), run on a 32-vCPU server on 2026-11-13.
 
 | Same-work pairs among 12,688 OpenITI versions (7,254 true pairs) | Precision | Recall | Reason given per decision |
 |---|---:|---:|---|
@@ -34,6 +35,16 @@ the KITAB project) say which versions are one work. The matcher never sees the U
 | OpenRefine 3.10.1, fingerprint clustering, title + author | 0.741 | 0.439 | ✗ |
 | OpenRefine 3.10.1, nearest-neighbour Levenshtein (radius 2), title | 0.619 | 0.578 | ✗ |
 | OpenRefine 3.10.1, fingerprint clustering, title only | 0.648 | 0.559 | ✗ |
+| Baseline: identical title, no clustering | 0.648 | 0.556 | ✗ |
+
+Fingerprint clustering on the title adds 16 true pairs and 4 wrong ones to the identical-title baseline (4,052 and
+2,196 against 4,036 and 2,192).
+
+**Held out.** With one side the rules never saw, 657 Wikidata book items (the Arabic title and author labels written
+by Wikidata's editors) against the same 12,688 OpenITI versions, labelled by the Shamela book id that both carry
+(Wikidata P12239, and the `Shamela…` part of an OpenITI version URI), turath-match reaches **0.980 precision and
+0.727 recall**; without the version made from that very Shamela book, 0.969 and 0.699
+([`bench/wikidata_heldout.py`](bench/wikidata_heldout.py)).
 
 | Checked 2026-11-13 | turath-match | Searching Shamela / Waqfeya / archive.org by hand | OpenRefine 3.10.1 | Calibre (metadata download, Find Duplicates plugin) | OpenITI / KITAB tools |
 |---|---|---|---|---|---|
@@ -52,8 +63,8 @@ own HTTP API ([`bench/openrefine_compare.py`](bench/openrefine_compare.py)).
 
 **What makes the difference, with evidence:**
 
-1. **Precision first.** 98.4 % of the pairs turath-match calls «the same work» are the same OpenITI work;
-   OpenRefine's best clustering of the same records reaches 74.1 %. Common names never carry a match, and
+1. **Precision first.** 98.4 % of the pairs turath-match calls «the same work» are the same OpenITI work
+   (98.0 % on the held-out Wikidata records); OpenRefine's best clustering of the same records reaches 74.1 %. Common names never carry a match, and
    «شرح», «مختصر», «ذيل», «رواية» make a *related* work, never the work ([the rules](docs/matching.md)).
 2. **Editions, not only works.** Against the Shamela books OpenITI texts were made from (run on your own install
    with [`bench/shamela_openiti.py`](bench/shamela_openiti.py)), 99.3 % of «same edition» verdicts are right.
@@ -165,12 +176,15 @@ print(m.explain())
 
 | Benchmark ([`bench/compare.sh`](bench/compare.sh), 2026-11-13) | Size | Precision | Recall | Time (12 workers) |
 |---|---:|---:|---:|---:|
-| Work level: OpenITI versions against each other | 12,688 versions, 237,811 pairs compared | 0.984 | 0.812 | 271 s |
+| Work level: OpenITI versions against each other (the development set) | 12,688 versions, 237,811 pairs compared | 0.984 | 0.812 | 271 s |
+| Work level, held out: Wikidata records against OpenITI | 657 items × 12,688 versions, 20,715 pairs | 0.980 | 0.727 | 9 s |
 | Work level: OpenITI against the Shamela books they were made from | 3,566 × 3,557 | 0.996 | 0.716 | 53 s |
 | Edition level: the same pairs | 2,853 same-work pairs | 0.993 | 0.498 | |
 | A 500-book library against the OpenITI catalog | 500 × 8,233 | 0.995 | 0.752 | 154 s (1 process) |
 
-Method, every table and the kinds of error: [docs/benchmarks.md](docs/benchmarks.md). Recall counts every pair OpenITI files under one book URI, including volumes split into separate texts, hadith
+The rules were developed on OpenITI 2025.1.9, which every row draws on; the held-out row sets Wikidata's records,
+which the rules never saw, against it. Method, every table and the kinds of error:
+[docs/benchmarks.md](docs/benchmarks.md). Recall counts every pair OpenITI files under one book URI, including volumes split into separate texts, hadith
 *juz'* collections filed under their compiler, and titles that share no word at all (*al-Wajīz* and *Tafsīr
 al-Wāḥidī*). Edition recall is low by design: about half of the records name no editor and no publisher, and those
 pairs are reported as `have_work` («edition not proven») instead of being guessed.
