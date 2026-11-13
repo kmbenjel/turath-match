@@ -24,7 +24,7 @@ list, and your decisions on it are kept.
 
 ## Why turath-match? How it compares
 
-Measured on public data: the 12,688 Arabic text versions of OpenITI 2025.1.9, whose book URIs (curated by
+Measured on public data: the 12,688 Arabic text versions of OpenITI 2025.1.9 that carry a title and an author, whose book URIs (curated by
 the KITAB project) say which versions are one work. The matcher never sees the URIs. Every number below comes from
 [`bench/compare.sh`](bench/compare.sh), run on a 32-vCPU server on 2026-11-13.
 
