@@ -14,7 +14,8 @@ All notable changes to this project are documented here. The format follows
 - Edition-level matching: exact file size or checksum, else editor, publisher, volumes and year; theses,
   manuscripts and typed copies are never the printed edition.
 - File-level provenance by exact byte size, with optional md5/sha1 verification.
-- Duplicate proof by size and five sampled 64 KB windows, optional full SHA-256, and a planfs plan for the copies.
+- Duplicate proof by size and five sampled 64 KB windows, optional full SHA-256, and a planfs plan for the copies
+  that keeps the best-named one (`dups --plan --profile`).
 - Source adapters: folder (naming profiles), CSV/TSV (English or Arabic headers), OpenITI release metadata,
   archive.org (search and `_files.xml`), Waqfeya (list API and book pages), your own Shamela install (read-only),
   JSONL.

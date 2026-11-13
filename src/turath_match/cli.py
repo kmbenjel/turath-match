@@ -13,7 +13,7 @@ from importlib import resources
 from pathlib import Path
 
 from . import __version__
-from .dups import find_duplicates, scan_sizes
+from .dups import choose_keep, find_duplicates, scan_sizes
 from .edition import match_edition
 from .models import Record
 from .provenance import SizeIndex, trace
@@ -219,7 +219,7 @@ def cmd_dups(a: argparse.Namespace) -> int:
             fh.write(f"#planfs name dedupe-{time.strftime('%Y%m%d')}\n#planfs target {root.resolve()}\n")
             fh.write("action\tfrom\tto\treason\n")
             for g in groups:
-                keep, *rest = sorted(g.paths, key=lambda p: (len(p), p))
+                keep, *rest = choose_keep(g.paths, a.profile, root)
                 for p in rest:
                     why = "same SHA-256" if g.method == "hash" else "same size and five sampled 64 KB windows"
                     fh.write(
@@ -419,7 +419,12 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--workers", type=int, default=4)
     sp.add_argument("--json")
     sp.add_argument(
-        "--plan", help="write a planfs plan that deletes every copy but one (nothing is deleted here)"
+        "--plan",
+        help="write a planfs plan that deletes every copy but one (nothing is deleted here); the copy kept is the "
+        "one whose name the --profile reads best, then the one with more name parts, then the shortest path",
+    )
+    sp.add_argument(
+        "--profile", default="smart", help="naming profile used to choose the copy to keep (as for scan)"
     )
 
     sp = add(

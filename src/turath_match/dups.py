@@ -9,11 +9,14 @@ SHA-256 for the final proof. A file that cannot be read gets its own fingerprint
 from __future__ import annotations
 
 import hashlib
+import re
 from collections import defaultdict
 from collections.abc import Callable, Iterable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
+
+from .sources.folder import parse_name
 
 WINDOW = 64 * 1024
 FRACTIONS = (0.0, 0.25, 0.5, 0.75, 1.0)
@@ -118,3 +121,42 @@ def scan_sizes(
         for p in sorted(root.rglob("*"))
         if p.is_file() and (not suffixes or p.suffix.lower() in suffixes)
     ]
+
+
+# a camera, scanner or download name: «scan_0007», «IMG_1234», «DSC01234», «document (3)», «12345», a hex id
+_RAW_NAME = re.compile(
+    r"^(?:(?:scan|scanned|img|image|dsc|dscn|pxl|photo|doc|document|file|page|untitled|copy|new|book|download)s?"
+    r"[\s_.\-]*)?[\d\s_.\-()]*$|^[0-9a-f]{12,}$",
+    re.I,
+)
+_VOLUME_PREFIX = re.compile(r"^\s*(?:\d{1,3}|ج\s*\d{1,3})(?:\s+-\s+|\s*$)")
+
+
+def _book_name(path: str, root: str | Path | None) -> str:
+    """The name that describes the book: the file's stem, or its folder's name when the file is only a volume
+    number («01.pdf», «03 - .pdf»), as in a folder of numbered volumes."""
+    p = Path(path)
+    stem = _VOLUME_PREFIX.sub("", p.stem).strip()
+    if not stem and p.parent.name and (root is None or p.parent != Path(root)):
+        return p.parent.name
+    return stem or p.stem
+
+
+def is_raw_name(name: str) -> bool:
+    """True for a scanner, camera or download name that says nothing about the book."""
+    return bool(_RAW_NAME.match(name.strip())) or not re.search(r"[^\W\d_]", name)
+
+
+def keep_rank(path: str, profile: str = "smart", root: str | Path | None = None) -> tuple[int, int, int, str]:
+    """Sort key for the copy to keep, best first: a name that the naming ``profile`` reads into a title and at
+    least one more part beats a raw scan name; then the name with more metadata parts; then the shorter path."""
+    name = _book_name(path, root)
+    raw = is_raw_name(name)
+    fields = {k: v for k, v in parse_name(name, profile).items() if v}
+    passes = not raw and (len(fields) >= 2 or profile == "title")
+    return (0 if passes else 1 if not raw else 2, -len(fields), len(path), path)
+
+
+def choose_keep(paths: Iterable[str], profile: str = "smart", root: str | Path | None = None) -> list[str]:
+    """``paths`` ordered best copy first (see :func:`keep_rank`): the first is kept, the rest are duplicates."""
+    return sorted(paths, key=lambda p: keep_rank(p, profile, root))

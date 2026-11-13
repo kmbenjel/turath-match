@@ -111,3 +111,24 @@ def test_scan_sizes_and_group_dict(tmp_path):
     _write(tmp_path / "notes.txt", b"2")
     assert [os.path.basename(p) for p, _ in scan_sizes(tmp_path)] == ["a.pdf"]
     assert DuplicateGroup(1, "f", ["x"]).to_dict()["method"] == "sampled_bytes"
+
+
+def test_the_copy_kept_is_the_best_named(tmp_path):
+    from turath_match.dups import choose_keep, is_raw_name
+
+    assert all(
+        is_raw_name(n) for n in ("scan_0007", "IMG_1234", "DSC01234", "document (3)", "12345", "scans")
+    )
+    assert not any(is_raw_name(n) for n in ("مقدمة ابن خلدون", "Muqaddima-scan", "الأم"))
+    good = str(tmp_path / "مقدمة ابن خلدون - ابن خلدون - ت علي عبد الواحد وافي.pdf")
+    title_only = str(tmp_path / "x" / "مقدمة.pdf")
+    raw = str(tmp_path / "scan_0007.pdf")
+    # the raw name is the shortest path, and still loses; more name parts beat fewer
+    assert choose_keep([raw, title_only, good], root=tmp_path) == [good, title_only, raw]
+    # a volume file takes its folder's name; the shortest path breaks a tie
+    vol = str(tmp_path / "الأم - الشافعي" / "01.pdf")
+    assert choose_keep([str(tmp_path / "scans" / "1.pdf"), vol], root=tmp_path)[0] == vol
+    a, b = str(tmp_path / "الأم - الشافعي.pdf"), str(tmp_path / "copies" / "الأم - الشافعي.pdf")
+    assert choose_keep([b, a], root=tmp_path) == [a, b]
+    # the title profile reads every name as one part: any real name passes, and the shorter path wins
+    assert choose_keep([raw, good, title_only], "title", tmp_path) == [title_only, good, raw]

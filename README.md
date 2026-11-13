@@ -101,7 +101,8 @@ at work, edition and file level, and prove it.
 - **Polite on the network:** a disk cache, one request per second per host, retries with back-off, `--offline`,
   and a User-Agent that names the tool.
 - **Duplicates proven** by size and five 64 KB windows (works over FTP or SFTP), optional full SHA-256, and a
-  [planfs](https://github.com/kmbenjel/planfs) plan that quarantines the copies.
+  [planfs](https://github.com/kmbenjel/planfs) plan that quarantines the copies and keeps the best-named one (a
+  name the naming profile reads beats `scan_0007.pdf`; then more name parts; then the shorter path).
 - **Outputs for people and machines:** `report.html`, `report.md`, `status.tsv`, `review.tsv`, `copies.tsv`,
   `matches.jsonl` and a work `crosswalk.jsonl` ([schema](docs/schema.md)) that
   [turath-catalog](https://github.com/kmbenjel/turath-catalog) imports.

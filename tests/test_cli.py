@@ -80,6 +80,18 @@ def test_reconcile_scan_export_provenance(tmp_path, capsys):
     assert len(json.loads((tmp_path / "d.json").read_text())[0]["paths"]) == 2
 
 
+def test_dups_plan_keeps_the_well_named_copy(tmp_path):
+    lib = tmp_path / "lib"
+    lib.mkdir()
+    data = bytes(range(256)) * 1000
+    (lib / "scan_0007.pdf").write_bytes(data)
+    (lib / "مقدمة ابن خلدون - ابن خلدون - ت علي عبد الواحد وافي.pdf").write_bytes(data)
+    plan = tmp_path / "dedupe.tsv"
+    assert cli.main(["dups", str(lib), "--plan", str(plan)]) == 0
+    rows = plan.read_text("utf-8").splitlines()
+    assert len(rows) == 4 and rows[3].startswith("delete\tscan_0007.pdf\t\tduplicate of مقدمة ابن خلدون")
+
+
 def test_errors_are_friendly(tmp_path, capsys):
     assert cli.main(["reconcile", "-l", str(tmp_path / "nope.bin"), "-t", "csv:x.csv"]) == 2
     assert "scheme:path" in capsys.readouterr().err
