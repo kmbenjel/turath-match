@@ -28,7 +28,7 @@ classifiers = [
   "Topic :: Text Processing :: Linguistic",
   "Typing :: Typed",
 ]
-dependencies = ["arabic-bib>=0.1"]
+dependencies = ["arabic-bib>=0.1,<0.2"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "pytest-cov>=5", "ruff>=0.6", "mypy>=1.10"]
