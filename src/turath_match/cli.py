@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import csv
 import json
 import shutil
@@ -74,10 +75,19 @@ def _record_from(arg: str, scheme: str) -> Record:
 def cmd_explain(a: argparse.Namespace) -> int:
     left, right = _record_from(a.left, "left"), _record_from(a.right, "right")
     m = match_work(left, right)
+    edition = a.edition or left.editor or right.editor or left.publisher or right.publisher
+    e = match_edition(left, right) if edition else None
+    if a.json:
+        print(
+            json.dumps(
+                {"work": m.to_dict(), "edition": e.to_dict() if e else None}, ensure_ascii=False, indent=1
+            )
+        )
+        return 0
     print(m.explain())
-    if a.edition or left.editor or right.editor or left.publisher or right.publisher:
+    if e:
         print()
-        print(match_edition(left, right).explain())
+        print(e.explain())
     return 0
 
 
@@ -324,7 +334,7 @@ def build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     p.add_argument("--version", action="version", version=f"turath-match {__version__} (text: {BACKEND})")
-    sub = p.add_subparsers(dest="cmd", required=True, metavar="command")
+    sub = p.add_subparsers(dest="cmd", metavar="command")
 
     def add(name: str, fn, help_: str, example: str) -> argparse.ArgumentParser:
         sp = sub.add_parser(
@@ -377,6 +387,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("left", help="title|author|editor|publisher|year")
     sp.add_argument("right")
     sp.add_argument("--edition", action="store_true", help="also compare editions")
+    sp.add_argument("--json", action="store_true", help="the verdicts and their evidence as JSON")
 
     sp = add(
         "scan",
@@ -465,13 +476,31 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
+def _utf8_output() -> None:
+    """Arabic output must not fail on a console with a legacy code page (Windows cp1252)."""
+    for stream in (sys.stdout, sys.stderr):
+        enc = (getattr(stream, "encoding", None) or "").lower().replace("-", "")
+        if enc != "utf8" and hasattr(stream, "reconfigure"):
+            with contextlib.suppress(OSError, ValueError):
+                stream.reconfigure(encoding="utf-8", errors="replace")
+
+
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    from .net import HttpError
+
+    _utf8_output()
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if not getattr(args, "fn", None):  # no command: the whole help teaches more than a one-line usage error
+        parser.print_help(sys.stderr)
+        return 2
     try:
         return int(args.fn(args) or 0)
-    except (ValueError, FileNotFoundError) as e:
-        print(f"turath-match: {e}", file=sys.stderr)
+    except (ValueError, FileNotFoundError, NotADirectoryError, HttpError) as e:
+        print(f"turath-match {args.cmd}: {e}", file=sys.stderr)
         return 2
+    except BrokenPipeError:  # pragma: no cover - `turath-match … | head`
+        return 0
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -78,6 +78,10 @@ def open_source(spec: str) -> Source:
     scheme, sep, loc = spec.partition(":")
     if not sep or scheme not in _REGISTRY or len(scheme) == 1:  # «C:\…» or a bare path
         p = Path(spec).expanduser()
+        if sep and len(scheme) > 1 and scheme.isalnum() and not p.exists():
+            raise ValueError(
+                f"unknown source scheme «{scheme}» in «{spec}»; the schemes are {', '.join(schemes())}"
+            )
         if p.is_dir():
             scheme, loc = "folder", spec
         elif p.suffix.lower() in (".csv", ".tsv"):

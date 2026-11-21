@@ -132,3 +132,18 @@ def test_the_copy_kept_is_the_best_named(tmp_path):
     assert choose_keep([b, a], root=tmp_path) == [a, b]
     # the title profile reads every name as one part: any real name passes, and the shorter path wins
     assert choose_keep([raw, good, title_only], "title", tmp_path) == [title_only, good, raw]
+
+
+def test_a_second_copy_by_its_name_loses_the_tie(tmp_path):
+    from turath_match.dups import choose_keep, strip_copy_marks
+
+    assert strip_copy_marks("lamiya-final(2) - Copy") == ("lamiya-final", 2)
+    assert strip_copy_marks("Copy of الأم") == ("الأم", 1)
+    assert strip_copy_marks("الأم - نسخة ثانية") == ("الأم", 1)
+    assert strip_copy_marks("نسخة") == ("نسخة", 0) and strip_copy_marks("photocopy") == ("photocopy", 0)
+    a, b = str(tmp_path / "lamiya-final(2).pdf"), str(tmp_path / "lamiya-final(2) - Copy.pdf")
+    assert choose_keep([b, a], root=tmp_path) == [a, b]  # «- Copy» is not a second name part
+    good, again = str(tmp_path / "الأم - الشافعي.pdf"), str(tmp_path / "الأم - الشافعي (1).pdf")
+    assert choose_keep([again, good], root=tmp_path) == [good, again]
+    # a well-named second copy still beats a raw scan name
+    assert choose_keep([str(tmp_path / "scan_0007.pdf"), again], root=tmp_path)[0] == again

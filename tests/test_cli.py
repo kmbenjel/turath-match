@@ -128,3 +128,41 @@ def test_fetch_uses_polite_cache(tmp_path, monkeypatch, capsys):
 def test_shamela_cards_explains_requirements(tmp_path, capsys):
     assert cli.main(["shamela-cards", "--path", str(tmp_path), "-o", str(tmp_path / "c.jsonl")]) == 2
     assert "Java" in capsys.readouterr().err
+
+
+def test_explain_json(capsys):
+    assert (
+        cli.main(
+            ["explain", "--json", "فتح الباري|ابن حجر", "فتح الباري بشرح صحيح البخاري|ابن حجر العسقلاني"]
+        )
+        == 0
+    )
+    d = json.loads(capsys.readouterr().out)
+    assert d["work"]["verdict"] == "same" and d["work"]["evidence"] and d["edition"] is None
+
+
+def test_errors_are_one_line(tmp_path, capsys):
+    assert cli.main([]) == 2
+    assert "turath-match demo" in capsys.readouterr().err  # no command: the whole help
+    assert cli.main(["dups", str(tmp_path / "none")]) == 2
+    assert "is not a folder" in capsys.readouterr().err
+    assert cli.main(["reconcile", "-l", str(tmp_path), "-t", "xyz:w.csv"]) == 2
+    err = capsys.readouterr().err
+    assert "unknown source scheme «xyz»" in err and "csv" in err
+    assert (
+        cli.main(
+            [
+                "fetch",
+                "archive",
+                "--offline",
+                "--cache",
+                str(tmp_path / "c"),
+                "--search",
+                "a|b",
+                "-o",
+                str(tmp_path / "x"),
+            ]
+        )
+        == 2
+    )
+    assert "offline" in capsys.readouterr().err

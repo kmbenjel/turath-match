@@ -116,6 +116,8 @@ def scan_sizes(
     root: str | Path, suffixes: tuple[str, ...] = (".pdf", ".epub", ".djvu")
 ) -> list[tuple[str, int]]:
     root = Path(root)
+    if not root.is_dir():
+        raise ValueError(f"{root} is not a folder")
     return [
         (str(p), p.stat().st_size)
         for p in sorted(root.rglob("*"))
@@ -147,14 +149,35 @@ def is_raw_name(name: str) -> bool:
     return bool(_RAW_NAME.match(name.strip())) or not re.search(r"[^\W\d_]", name)
 
 
-def keep_rank(path: str, profile: str = "smart", root: str | Path | None = None) -> tuple[int, int, int, str]:
+# what a file manager or a browser adds to the name of a second copy: «X - Copy», «X (1)», «Copy of X», «X - نسخة»
+_COPY_MARK = re.compile(
+    r"\s*(?:[-–_]\s*)?(?:\(\s*\d{1,3}\s*\)|\(?\b(?:copy|copie|kopie|duplicate)\b(?:\s*\(?\d{1,3}\)?)?\)?"
+    r"|(?:نسخة|نسخه)(?:\s+(?:ثانية|ثالثة|أخرى|اخرى|مكررة|\d{1,3}))?)\s*$|^\s*copy\s+of\s+",
+    re.I,
+)
+
+
+def strip_copy_marks(name: str) -> tuple[str, int]:
+    """(the name without the marks of a second copy, how many there were): «X(2) - Copy» -> («X», 2)."""
+    n = 0
+    while True:
+        m = _COPY_MARK.search(name)
+        if not m or not (name[: m.start()] + name[m.end() :]).strip():
+            return name.strip(), n
+        name, n = name[: m.start()] + name[m.end() :], n + 1
+
+
+def keep_rank(
+    path: str, profile: str = "smart", root: str | Path | None = None
+) -> tuple[int, int, int, int, str]:
     """Sort key for the copy to keep, best first: a name that the naming ``profile`` reads into a title and at
-    least one more part beats a raw scan name; then the name with more metadata parts; then the shorter path."""
-    name = _book_name(path, root)
+    least one more part beats a raw scan name; then the name that is not marked as a second copy («- Copy»,
+    «(1)», «نسخة»); then the name with more metadata parts; then the shorter path."""
+    name, marks = strip_copy_marks(_book_name(path, root))
     raw = is_raw_name(name)
     fields = {k: v for k, v in parse_name(name, profile).items() if v}
     passes = not raw and (len(fields) >= 2 or profile == "title")
-    return (0 if passes else 1 if not raw else 2, -len(fields), len(path), path)
+    return (0 if passes else 1 if not raw else 2, marks, -len(fields), len(path), path)
 
 
 def choose_keep(paths: Iterable[str], profile: str = "smart", root: str | Path | None = None) -> list[str]:
