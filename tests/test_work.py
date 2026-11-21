@@ -170,3 +170,30 @@ def test_long_title_tolerates_one_word_in_four():
     a = R("القواعد والفوائد الأصولية ومايتبعها من الأحكام الفرعية", "ابن اللحام")
     b = R("القواعد والفوائد الأصولية وما يتبعها من الأحكام الفرعية", "ابن اللحام")
     assert match_work(a, b).verdict == SAME
+
+
+def test_index_finds_a_common_title_by_its_author():
+    """«تاريخ الإسلام» is made of words half the catalog holds: the author's name narrows the candidates."""
+    from turath_match.index import TokenIndex
+
+    noise = [R(f"تاريخ {w}", f"مؤلف {i}", rid=f"n{i}") for i, w in enumerate(["بغداد", "دمشق", "مصر"] * 40)]
+    long = R("تاريخ الإسلام ووفيات المشاهير والأعلام", "شمس الدين الذهبي", rid="long")
+    idx = TokenIndex([*noise, long], common_share=0.05)
+    assert len(idx.post["تاريخ"]) > idx.common  # the title word alone proposes nothing
+    got = idx.candidates(R("تاريخ الإسلام", "الذهبي", rid="q"), limit=10)
+    assert got[0].key == long.key
+    # with another author the long title is not proposed through the name
+    other = idx.candidates(R("تاريخ الإسلام", "حسن إبراهيم حسن", rid="q2"), limit=10)
+    assert other and long.key not in [r.key for r in other[:1]]
+
+
+def test_old_spellings_of_a_name_are_one_author():
+    m = match_work(
+        R("المسند", "إسحق بن راهويه"), R("المسند", "أبو يعقوب إسحاق بن إبراهيم المعروف بابن راهويه")
+    )
+    assert m.verdict == "same" and m.status == "match"
+
+
+def test_the_grandson_is_another_author():
+    m = match_work(R("مرآة الزمان", "سبط ابن الجوزي"), R("مرآة الزمان", "ابن الجوزي"))
+    assert m.verdict == "different"

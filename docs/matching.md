@@ -26,8 +26,15 @@ flowchart LR
 
 Two records name the same work when **the titles agree and the authors agree**.
 
-**Titles.** A title is taken apart before it is compared: edition tails (« - ت محب الدين الخطيب», « - ط السلفية»)
-become editor and publisher hints; alternative titles («الجامع الصحيح = صحيح البخاري», «تفسير القشيري المسمى
+**Candidates.** Records are compared only when they are worth it: they share the first word of a title, or two
+title words, or one title word and a distinctive word of the author's name. The last rule is what finds «تاريخ
+الإسلام» for «تاريخ الإسلام ووفيات المشاهير والأعلام» by al-Dhahabī, whose short title is made of words half the
+catalog holds.
+
+**Titles.** A title is taken apart before it is compared: edition tails (« - ت محب الدين الخطيب», « - ط السلفية»,
+« - دار النفائس», and the same written with no dash: «البعث والنشور للبيهقي ت الشوامي», «التبيان ط عالم الفوائد»)
+become editor and publisher hints; what a digital library says about its own copy («موافق للمطبوع», «مشكول»,
+«نسخة أخرى», an alternative «= مقابل») is dropped; alternative titles («الجامع الصحيح = صحيح البخاري», «تفسير القشيري المسمى
 لطائف الإشارات») are compared one by one; works printed with it («ويليه …», «ومعه …», «وبهامشه …») are set aside;
 function words, the article and joined particles (و ب ل ف) never make two words differ; «ابن» = «بن», «ديوان» =
 «شعر»; a leading «كتاب», «مسألة» or «جزء فيه» is dropped; the author's own name inside a title («مقدمة ابن
@@ -46,7 +53,10 @@ Then the two titles are:
 
 **Authors** come from [arabic-bib](https://github.com/kmbenjel/arabic-bib): a name is parsed into ism, kunya, nasab,
 nisba, laqab and shuhra, and two names are `same`, `different` or `unknown`. A match never rests on a common name
-alone: «محمد», «أحمد», «عبد الله», «شمس الدين», «الدمشقي», «الشافعي» prove nothing by themselves. turath-match adds
+alone: «محمد», «أحمد», «عبد الله», «شمس الدين», «الدمشقي», «الشافعي» prove nothing by themselves. The old and
+regional spellings of a name meet («إسحق» = «إسحاق», «عبد الرحمان» = «عبد الرحمن»), the asides of a long catalog
+form («ويقال: …», «بالولاء») are set aside, and a man named after a relative is another author: «سبط ابن الجوزي»
+never matches «ابن الجوزي». turath-match adds
 the catalog layer on top: every pair of name forms a catalog gives («الجاحظ ؛ أبو عثمان عمرو بن بحر») is tried and
 one proving form is enough; library-catalog order («ابن المقفع، عبد الله») is turned around; death years agree
 within 2 years, and up to 12 years apart only when the full names agree (catalogs give 356 or 362 for Abū
@@ -92,7 +102,9 @@ Two files are duplicates when their sizes are equal and five 64 KB windows agree
 320 KB read per file, so it works over FTP/SFTP, where checksums are not available. `--deep` adds a full SHA-256.
 A file that cannot be read gets its own fingerprint and is never a duplicate. `--plan` writes a
 [planfs](https://github.com/kmbenjel/planfs) plan that moves every copy but one to quarantine; nothing is deleted
-by turath-match itself.
+by turath-match itself. The copy kept is the best-named one: a name the naming profile reads into a title and
+another part beats a scanner's name; then the name with no mark of a second copy («- Copy», «(1)», «Copy of …»,
+«نسخة ثانية»); then more name parts; then the shorter path.
 
 ## The review list
 

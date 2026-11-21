@@ -56,3 +56,16 @@ def test_uninvert():
     assert text.uninvert('"إبن المقفع، عبد الله"') == "عبد الله ابن المقفع"
     assert text.uninvert("الجاحظ، عمرو بن بحر، 255 هـ") == "عمرو بن بحر الجاحظ 255 هـ"
     assert text.uninvert("صحيح البخاري") == "صحيح البخاري"
+
+
+def test_death_year_in_either_calendar():
+    from turath_match import Record, match_work
+    from turath_match.text import parse_death
+
+    assert parse_death("محمود شاكر (ت 1997 م)") == 1417
+    assert parse_death("محمود شاكر (ت 1418 هـ)") == 1418
+    assert parse_death("ولد سنة 1350 هـ") is None  # a birth year is not a death year
+    a = Record("a", "1", "أباطيل وأسمار", "محمود محمد شاكر (ت 1997 م)")
+    b = Record("b", "2", "أباطيل وأسمار", "محمود محمد شاكر (ت 1418 هـ)")
+    m = match_work(a, b)
+    assert m.verdict == "same" and any(e.kind == "death" and e.weight > 0 for e in m.evidence)

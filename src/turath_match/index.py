@@ -3,7 +3,9 @@
 Comparing every record with every other is quadratic; a heritage catalog has tens of thousands of records.
 The index maps each title word (in its comparison form) to the records whose titles hold it. A record's
 candidates share its first title word, or at least two title words; words that occur in a large share of the
-catalog («كتاب», «شرح», «رسالة») only count together with a rarer one.
+catalog («كتاب», «شرح», «رسالة») only count together with a rarer one, or together with the author: a title made
+of common words («تاريخ الإسلام», «الأمالي», «السنة») finds the records that share one of its words and a
+distinctive word of its author's name.
 """
 
 from __future__ import annotations
@@ -12,6 +14,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 
 from .models import Record
+from .text import author_tokens
 from .titles import FILL, analyse, base, tok
 
 
@@ -44,12 +47,15 @@ class TokenIndex:
         self.records: list[Record] = list(records)
         self.post: dict[str, set[int]] = defaultdict(set)
         self.first: dict[str, set[int]] = defaultdict(set)
+        self.by_author: dict[str, set[int]] = defaultdict(set)
         for i, r in enumerate(self.records):
             firsts, keys = title_words(r)
             for k in keys:
                 self.post[k].add(i)
             for f in firsts:
                 self.first[f].add(i)
+            for a in author_tokens(r.author):
+                self.by_author[a].add(i)
         self.common = max(50, int(len(self.records) * common_share))
 
     def candidates(self, r: Record, limit: int = 200) -> list[Record]:
@@ -64,9 +70,20 @@ class TokenIndex:
         for f in firsts:
             ids = self.first.get(f, set())
             chosen |= ids & set(hits) if len(ids) > self.common else ids
+        # the same author (a distinctive word of the name) and one title word in common, however common the word
+        same_author: set[int] = set()
+        for a in author_tokens(r.author):
+            ids = self.by_author.get(a) or set()
+            if 0 < len(ids) <= self.common:
+                same_author |= ids
+        by_name: set[int] = set()
+        if same_author:
+            for k in keys:
+                by_name |= self.post.get(k, set()) & same_author
+            chosen |= by_name
         if (
             not chosen and len(keys) == 1
         ):  # a one-word title made of a common word: compare with its namesakes
             chosen = set(list(self.first.get(next(iter(keys)), set()))[:limit])
-        ranked = sorted(chosen, key=lambda i: -hits.get(i, 0))[:limit]
+        ranked = sorted(chosen, key=lambda i: (-hits.get(i, 0) - (2 if i in by_name else 0), i))[:limit]
         return [self.records[i] for i in ranked]

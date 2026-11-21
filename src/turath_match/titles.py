@@ -77,6 +77,22 @@ TAIL = re.compile(
     r"^(?:(?:ط|ت)[\s.]|ط$|ضمن|تحقيق|بتحقيق|طبعة|الطبعة|المنسوب|منسوب|جامعة|رسالة\s+(?:ماجستير|دكتوراه|دكتوراة|علمية)"
     r"|مخطوط|نشرة|ق\s*\d|\d)"
 )
+# an imprint written after the dash with no «ط»: «تفسير النسفي - دار النفائس», «الروض المربع - مكتبة الرياض»
+_PUBLISHER_TAIL = re.compile(r"^(?:دار|مكتبة|المكتبة|مؤسسة|مطبعة|المطبعة|المكتب|منشورات|مطابع)\s+\S")
+# a title that ends in its edition with no dash: «البعث والنشور للبيهقي ت الشوامي», «التبيان ط عالم الفوائد»
+_BARE_TAIL = re.compile(r"^(?P<head>.*?[^\s\-–])\s+(?P<mark>ط|ت)\s*[.:]?\s+(?P<tail>\S.*)$")
+# what a digital library writes about its own copy, not about the work
+_COPY_NOTE = re.compile(
+    r"(?<![ء-ي])(?:(?:غير\s+)?موافق(?:ا|ة)?\s+للمطبوع(?:\s+داخل\s+الصفحات)?|مشكول(?:ة|ا)?|"
+    r"محقق(?:ا|ة)(?=\s*(?:$|[-=]))|نسخة\s+(?:أخرى|اخرى|مصححة|منقحة|مشكولة|محققة))(?![ء-ي])"
+)
+# an «alternative title» that is only such a note («… = مقابل», «… = محقق») names nothing
+_NOTE_WORDS = {
+    tok(w)
+    for w in search_key(
+        "مقابل مقابلة محقق محققة مشكول مشكولة مصحح مصححة منقح منقحة مطبوع المطبوع موافق نسخة أخرى"
+    ).split()
+}
 _THESIS = re.compile(r"رسال[ةه]\s+(?:ماجستير|دكتوراه|دكتوراة|علمي[ةه])|أطروحة|اطروحة")
 _MANUSCRIPT = re.compile(r"\bمخطوط")
 _PARTNO = re.compile(r"(?:^|\s)(?:الجزء|ج|المجلد|مج)\s*\d+")
@@ -151,6 +167,26 @@ def _strip_attribution(words: list[str], names: dict[str, str]) -> tuple[list[st
     return words, set()
 
 
+def _is_title_part(p: str, info: TitleInfo, names: dict[str, str]) -> bool:
+    """Is the piece after a dash part of the title? An editor, a publisher or the author's name is not (the
+    first two are kept as hints for the edition)."""
+    if _PUBLISHER_TAIL.match(p):
+        info.publisher_hint = info.publisher_hint or p
+        return False
+    m = re.match(r"^ت[\s.:]+(.+)$", p)
+    if m:
+        info.editor_hint = info.editor_hint or m.group(1).strip()
+        return False
+    m = re.match(r"^ط[\s.:]+(.+)$", p)
+    if m:
+        info.publisher_hint = info.publisher_hint or m.group(1).strip()
+        return False
+    if TAIL.match(p):
+        return False
+    ws = [w for w in _words(p) if w not in FILL and not w.isdigit()]
+    return bool(ws) and not all(w in names for w in ws)  # «- الضياء المقدسي»: the author, not the title
+
+
 def analyse(title: str, author: str = "") -> TitleInfo:
     info = TitleInfo(raw=title or "")
     t = title or ""
@@ -161,24 +197,24 @@ def analyse(title: str, author: str = "") -> TitleInfo:
     if _PARTNO.search(t):
         info.flags.add("part")
     t = re.sub(r"\([^)]*\)|\[[^\]]*\]", " ", t)
+    t = _COPY_NOTE.sub(" ", t)
     names = {tok(a): a for a in author_tokens(author)}
+    alts = []
+    for alt in t.split("="):  # each alternative title may end in its own edition: «… ت الشوامي = …»
+        m = _BARE_TAIL.match(alt.strip())
+        if m:
+            alt = f"{m['head']} - {m['mark']} {m['tail']}"
+        alts.append(alt)
+    t = " = ".join(alts)
     parts = [p.strip() for p in re.split(r"\s+[-–]\s+", t) if p.strip()]
     head = parts[0] if parts else ""
     for p in parts[1:]:
-        m = re.match(r"^ت[\s.]+(.+)$", p)
-        if m:
-            info.editor_hint = info.editor_hint or m.group(1).strip()
-            continue
-        m = re.match(r"^ط[\s.]+(.+)$", p)
-        if m:
-            info.publisher_hint = info.publisher_hint or m.group(1).strip()
-            continue
-        if TAIL.match(p):
-            continue
-        ws = [w for w in _words(p) if w not in FILL and not w.isdigit()]
-        if not ws or all(w in names for w in ws):  # «- الضياء المقدسي»: the author, not the title
-            continue
-        head += " " + p  # «- رواية أبي مصعب», «- السفر الثاني»: part of what the title names
+        # a tail may be followed by the next alternative title: «… - ت X = عنوان آخر»
+        p, _, next_alt = (x.strip() for x in p.partition("="))
+        if p and _is_title_part(p, info, names):
+            head += " " + p  # «- رواية أبي مصعب», «- السفر الثاني»: part of what the title names
+        if next_alt:
+            head += " = " + next_alt
     for alt in re.split(r"=|\s(?:المسمى|المسماة|المسمي|المسماه|المعروف ب|المشهور ب)\s", head):
         pieces = JOINERS.split(" " + alt + " ")
         main = pieces[0]
@@ -192,6 +228,9 @@ def analyse(title: str, author: str = "") -> TitleInfo:
         info.attribution |= attr
         if ws:
             info.forms.append(TitleForm(ws))
+    named = [f for f in info.forms if not all(w in _NOTE_WORDS for w in f.words)]
+    if named:  # a title that is itself such a word («المحقق») stays when it is all there is
+        info.forms = named
     return info
 
 

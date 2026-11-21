@@ -117,12 +117,17 @@ _ANON = {"مجهول", "مولف مجهول", "غير معروف", "anonymous", 
 
 
 def parse_death(s: str) -> int | None:
-    """The Hijri death year in «ت 728 هـ», «(ت ٧٢٨هـ)», «661-728», «المتوفى: 728»."""
+    """The Hijri death year in «ت 728 هـ», «(ت ٧٢٨هـ)», «661-728», «المتوفى: 728»; a year given only in the
+    Gregorian calendar («ت 1999 م») is turned into the Hijri year it begins in, so the two calendars compare."""
     if not s:
         return None
     if _HAS_AB and hasattr(_ab, "parse_death"):
         d = _ab.parse_death(s)
-        return getattr(d, "hijri", None) if d is not None else None
+        if d is None:
+            return None
+        if d.hijri is None and d.gregorian and d.gregorian > 622:
+            return int(_ab.gregorian_year_to_hijri(d.gregorian)[0])
+        return d.hijri
     t = to_ascii_digits(s)
     m = re.search(r"(?:ت|المتوفى|المتوفي|توفي)[\s.:]*(\d{1,4})", t) or re.search(
         r"\d{1,4}\s*-\s*(\d{1,4})", t

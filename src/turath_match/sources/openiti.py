@@ -12,6 +12,7 @@ it once into the cache; nothing from OpenITI is shipped with turath-match.
 from __future__ import annotations
 
 import csv
+import html
 import re
 import sys
 from collections.abc import Iterator
@@ -43,7 +44,9 @@ def text_url(version_uri: str, book: str, date: str) -> str:
 
 
 def _alts(s: str) -> list[str]:
-    return [x.strip() for x in (s or "").split("::") if x.strip()]
+    """«a :: b» -> the alternatives, as text: entities decoded («&quot;»), line marks («¶») turned to spaces."""
+    s = " ".join(html.unescape(s or "").replace("¶", " ").split())
+    return [x.strip() for x in s.split("::") if x.strip()]
 
 
 _PUB = re.compile(
