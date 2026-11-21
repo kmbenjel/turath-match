@@ -24,8 +24,8 @@ All notable changes to this project are documented here. The format follows
 - With arabic-bib's faster keys and name parsing, comparing the same pairs takes about a third of the time (the
   237,812 pairs of the OpenITI benchmark: 154 s before, 53 s after, 14 workers on one server).
 - Benchmarks of 2026-11-21 against those of 2026-11-13: work level on OpenITI (development) 0.984 precision and
-  0.834 recall (0.984 and 0.812); held out, Wikidata records against OpenITI, 0.981 and 0.757 (0.980 and 0.727)
-  with the same 28 wrong pairs; the 500-book library finds 380 books (376) and leaves 82 items for a person (80).
+  0.834 recall (0.984 and 0.812); held out, Wikidata records against OpenITI, 0.981 and 0.755 (0.980 and 0.727)
+  with no more wrong pairs (28); the 500-book library finds 380 books (376) and leaves 82 items for a person (80).
 - The crosswalk names a work cluster after its plainest full title («رسالة الغفران», not the title that carries
   an edition note).
 - Command line: no command prints the whole help; `dups` on a path that is not a folder, an unknown source scheme

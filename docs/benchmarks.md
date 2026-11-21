@@ -15,9 +15,9 @@ never read, and a change is measured on them only after it is settled on the dev
 | Development (OpenITI), 2026-11-13 | 0.984 | 0.812 |
 | Development (OpenITI), 2026-11-21 | 0.984 | 0.834 |
 | Held out (Wikidata × OpenITI), 2026-11-13 | 0.980 | 0.727 |
-| Held out (Wikidata × OpenITI), 2026-11-21 | 0.981 | 0.757 |
+| Held out (Wikidata × OpenITI), 2026-11-21 | 0.981 | 0.755 |
 
-On the held-out set the 58 pairs gained came with no new wrong pair (28 before and after).
+On the held-out set the 54 pairs gained came with no more wrong pairs (28 before and after).
 
 ## 1. Work level on OpenITI ([`bench/openiti_works.py`](../bench/openiti_works.py))
 
@@ -29,8 +29,8 @@ On the held-out set the 58 pairs gained came with no new wrong pair (28 before a
 
 | | turath-match |
 |---|---:|
-| pairs called «same work» (status match) | 6,148 |
-| of which right | 5,892 |
+| pairs called «same work» (status match) | 6,147 |
+| of which right | 6,049 |
 | precision | **0.984** |
 | recall | **0.834** |
 | true pairs on the review list | 345 |
@@ -113,9 +113,9 @@ would carry them), reconciled against the primary versions of all 8,233 works.
 | | All pairs | Without the version made from the same Shamela book |
 |---|---:|---:|
 | true pairs | 1,927 | 1,270 |
-| pairs called «same work» | 1,486 | 956 |
+| pairs called «same work» | 1,482 | 953 |
 | precision | **0.981** | **0.971** |
-| recall | **0.757** | **0.731** |
+| recall | **0.755** | **0.728** |
 | true pairs on the review list | 182 | 135 |
 | other pairs on the review list | 71 | 71 |
 | decisions with evidence | 100 % | |

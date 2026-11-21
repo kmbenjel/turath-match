@@ -43,7 +43,7 @@ Fingerprint clustering on the title adds 17 true pairs and 4 wrong ones to the i
 **Held out.** With one side the rules never saw, 657 Wikidata book items (the Arabic title and author labels written
 by Wikidata's editors) against the same 12,688 OpenITI versions, labelled by the Shamela book id that both carry
 (Wikidata P12239, and the `Shamela…` part of an OpenITI version URI), turath-match reaches **0.981 precision and
-0.757 recall**; without the version made from that very Shamela book, 0.971 and 0.731
+0.755 recall**; without the version made from that very Shamela book, 0.971 and 0.728
 ([`bench/wikidata_heldout.py`](bench/wikidata_heldout.py)).
 
 | Checked 2026-11-13 | turath-match | Searching Shamela / Waqfeya / archive.org by hand | OpenRefine 3.10.1 | Calibre (metadata download, Find Duplicates plugin) | OpenITI / KITAB tools |
@@ -180,8 +180,8 @@ print(m.explain())
 
 | Benchmark ([`bench/compare.sh`](bench/compare.sh), 2026-11-21) | Size | Precision | Recall | Time (14 workers) |
 |---|---:|---:|---:|---:|
-| Work level: OpenITI versions against each other (the development set) | 12,688 versions, 262,914 pairs compared | 0.984 | 0.834 | 118 s |
-| Work level, held out: Wikidata records against OpenITI | 657 items × 12,688 versions, 21,926 pairs | 0.981 | 0.757 | 13 s |
+| Work level: OpenITI versions against each other (the development set) | 12,688 versions, 262,914 pairs compared | 0.984 | 0.834 | 86 s |
+| Work level, held out: Wikidata records against OpenITI | 657 items × 12,688 versions, 21,926 pairs | 0.981 | 0.755 | 10 s |
 | Work level: OpenITI against the Shamela books they were made from | 3,566 × 3,557 | 0.996 | 0.738 | 23 s |
 | Edition level: the same pairs | 2,939 same-work pairs | 0.993 | 0.499 | |
 | A 500-book library against the OpenITI catalog | 500 × 8,233 | 0.995 | 0.760 | 37 s (1 process) |
