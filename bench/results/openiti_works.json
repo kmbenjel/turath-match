@@ -1,19 +1,19 @@
 {
  "records": 12688,
  "books": 8233,
- "pairs_compared": 237811,
- "seconds": 270.9,
+ "pairs_compared": 262914,
+ "seconds": 118.3,
  "positive_pairs": 7254,
- "true_positive": 5892,
- "false_positive": 95,
+ "true_positive": 6050,
+ "false_positive": 98,
  "precision": 0.9841,
- "recall": 0.8122,
- "review_same_book": 332,
- "review_other_book": 1509,
- "related_on_same_book": 135,
+ "recall": 0.834,
+ "review_same_book": 345,
+ "review_other_book": 2277,
+ "related_on_same_book": 138,
  "related": {
-  "related_pairs_in_openiti_relations": 429,
-  "related_predicted": 5189
+  "related_pairs_in_openiti_relations": 486,
+  "related_predicted": 5766
  },
  "evidence_share": 1.0,
  "false_positive_examples": [
@@ -27,6 +27,22 @@
   ],
   [
    "جزء ابن عيينة = جزء فيه حديث سفيان بن عيينة",
+   "سفيان بن عيينة",
+   "جزء حديث سفيان بن عيينة",
+   "سفيان بن عيينة",
+   "0198SufyanIbnCuyayna.JuzFihiHadith",
+   "0198SufyanIbnCuyayna.JuzHadith"
+  ],
+  [
+   "حديث سفيان بن عيينة رواية الطائي (نسخة القسطلاني) - مخطوط = حديث سفيان بن عيينة - مخطوط",
+   "سفيان بن عيينة",
+   "جزء ابن عيينة - مكتبة المنار = جزء فيه حديث سفيان بن عيينة",
+   "سفيان بن عيينة",
+   "0198SufyanIbnCuyayna.JuzFihiHadith",
+   "0198SufyanIbnCuyayna.JuzHadith"
+  ],
+  [
+   "حديث سفيان بن عيينة رواية الطائي (نسخة القسطلاني) - مخطوط = حديث سفيان بن عيينة - مخطوط",
    "سفيان بن عيينة",
    "جزء حديث سفيان بن عيينة",
    "سفيان بن عيينة",
@@ -122,17 +138,17 @@
    "0292SacidBardhaci.SualatLiAbiZurca"
   ],
   [
-   "كتاب فلوطارخس في الأراء الطبيعية اللتي¶    تقول بها الحكماء",
+   "كتاب فلوطارخس في الأراء الطبيعية اللتي تقول بها الحكماء",
    "قسطا بن لوقا ؛ قسطا بن لوقا البعلبكي",
-   "كتاب فلوطارخس في الأراء الطبيعية اللتي¶    تقول بها الحكماء",
+   "كتاب فلوطارخس في الأراء الطبيعية اللتي تقول بها الحكماء",
    "قسطا بن لوقا ؛ قسطا بن لوقا البعلبكي",
    "0300QustaIbnLuqa.FulutarkhusFiAraTabiciyya",
    "0300QustaIbnLuqa.IbsiqlausFiMatalic"
   ],
   [
-   "كتاب فلوطارخس في الأراء الطبيعية اللتي¶    تقول بها الحكماء",
+   "كتاب فلوطارخس في الأراء الطبيعية اللتي تقول بها الحكماء",
    "قسطا بن لوقا ؛ قسطا بن لوقا البعلبكي",
-   "كتاب فلوطارخس في الأراء الطبيعية اللتي¶    تقول بها الحكماء",
+   "كتاب فلوطارخس في الأراء الطبيعية اللتي تقول بها الحكماء",
    "قسطا بن لوقا ؛ قسطا بن لوقا البعلبكي",
    "0300QustaIbnLuqa.FulutarkhusFiAraTabiciyya",
    "0300QustaIbnLuqa.IbsiqlausFiMatalic"
@@ -320,22 +336,6 @@
    "الصولي ؛ أبو بكر محمد بن يحيى بن العباس ",
    "0335Suli.AshcarAwladKhulafa",
    "0335Suli.KhilafatWathiq"
-  ],
-  [
-   "كتاب الأوراق = أشعار أولاد الخلفاء وأخبارهم",
-   "الصولي ؛ أبو بكر محمد بن يحيى بن العباس ",
-   "كتاب الأوراق = خلافة الواثق والمتوكل والمنتصر والمستعين والمعتز والمهتدي",
-   "الصولي ؛ أبو بكر محمد بن يحيى بن العباس ",
-   "0335Suli.AshcarAwladKhulafa",
-   "0335Suli.KhilafatWathiq"
-  ],
-  [
-   "ما لم ينشر من كتاب الأوراق = أخبار المقتدر",
-   "الصولي ؛ أبو بكر محمد بن يحيى بن العباس ",
-   "قطعة نادرة من كتاب الأوراق = أخبار المقتدر",
-   "الصولي ؛ أبو بكر محمد بن يحيى بن العباس ",
-   "0335Suli.MaLamYunshar",
-   "0335Suli.QitcaNadira"
   ]
  ],
  "related_but_same_book_examples": [

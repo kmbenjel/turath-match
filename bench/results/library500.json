@@ -1,24 +1,24 @@
 {
  "library_books": 500,
  "catalog_works": 8233,
- "seconds": 154.1,
+ "seconds": 37.0,
  "statuses": {
-  "missing": 7640,
+  "missing": 7621,
   "have": 83,
-  "review": 80,
-  "have_work": 289,
-  "related_only": 135,
-  "other_edition": 6
+  "review": 82,
+  "have_work": 287,
+  "related_only": 148,
+  "other_edition": 12
  },
- "found": 376,
+ "found": 380,
  "wrongly_found": 2,
- "precision": 0.9947,
- "recall": 0.752,
- "on_review_list": 80,
- "review_items_that_are_in_the_library": 43,
+ "precision": 0.9948,
+ "recall": 0.76,
+ "on_review_list": 82,
+ "review_items_that_are_in_the_library": 45,
  "matches_with_evidence": 1.0,
  "manual_minutes_per_book_assumed": 3.0,
  "manual_hours_for_the_library": 25.0,
- "person_hours_left_with_turath_match": 4.0,
- "decided_without_a_person": 457
+ "person_hours_left_with_turath_match": 4.1,
+ "decided_without_a_person": 455
 }

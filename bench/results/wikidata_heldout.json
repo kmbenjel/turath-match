@@ -6,26 +6,26 @@
  },
  "queries": 657,
  "openiti_versions": 12688,
- "pairs_compared": 20715,
- "seconds": 8.9,
+ "pairs_compared": 21926,
+ "seconds": 12.6,
  "queries_whose_title_is_that_of_the_same_shamela_version": 14,
  "all_pairs": {
   "positive_pairs": 1927,
-  "true_positive": 1400,
+  "true_positive": 1458,
   "false_positive": 28,
-  "precision": 0.9804,
-  "recall": 0.7265,
-  "review_same_work": 148,
-  "review_other_work": 59
+  "precision": 0.9812,
+  "recall": 0.7566,
+  "review_same_work": 182,
+  "review_other_work": 71
  },
  "other_sources": {
   "positive_pairs": 1270,
-  "true_positive": 888,
+  "true_positive": 928,
   "false_positive": 28,
-  "precision": 0.9694,
-  "recall": 0.6992,
-  "review_same_work": 104,
-  "review_other_work": 59
+  "precision": 0.9707,
+  "recall": 0.7307,
+  "review_same_work": 135,
+  "review_other_work": 71
  },
  "evidence_share": 1.0
 }

@@ -1,26 +1,26 @@
 {
  "openiti_versions": 3566,
  "shamela_books_labelled": 3557,
- "pairs_compared": 62344,
- "seconds": 53.2,
+ "pairs_compared": 66990,
+ "seconds": 22.8,
  "work": {
-  "tp": 2853,
+  "tp": 2939,
   "fp": 11,
-  "review_pos": 246,
+  "review_pos": 227,
   "review_neg": 32,
   "pos": 3985,
-  "precision": 0.9962,
-  "recall": 0.7159
+  "precision": 0.9963,
+  "recall": 0.7375
  },
  "edition": {
-  "tp": 1336,
+  "tp": 1370,
   "fp": 9,
-  "fn": 171,
-  "tn": 122,
-  "uncertain_pos": 1178,
-  "uncertain_neg": 37,
-  "precision": 0.9933,
-  "recall": 0.4976,
-  "different_rejected": 0.7262
+  "fn": 175,
+  "tn": 151,
+  "uncertain_pos": 1198,
+  "uncertain_neg": 36,
+  "precision": 0.9935,
+  "recall": 0.4995,
+  "different_rejected": 0.7704
  }
 }

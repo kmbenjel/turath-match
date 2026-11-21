@@ -5,6 +5,35 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- Candidates by author: a title made of words half the catalog holds («تاريخ الإسلام», «الأمالي», «السنة») is
+  compared with the records that share one of its words and a distinctive word of its author's name.
+- Titles: an edition written with no dash («البعث والنشور للبيهقي ت الشوامي», «التبيان ط عالم الفوائد») and a
+  publisher after the dash with no «ط» («تفسير النسفي - دار النفائس») become editor and publisher hints; what a
+  digital library says about its own copy («موافق للمطبوع», «مشكول», «نسخة أخرى», an alternative «= مقابل») is
+  not part of the title.
+- A death year given only in the Gregorian calendar («ت 1997 م») compares with a Hijri one.
+- `turath-match explain --json`: the work and edition verdicts with their evidence, for scripts.
+- `dups --plan`: a name marked as a second copy («- Copy», «(1)», «Copy of …», «نسخة ثانية») loses the tie, and
+  the mark is not read as a name part.
+- The OpenITI adapter decodes HTML entities and line marks in titles and authors.
+
+### Changed
+- Author agreement follows arabic-bib's current rules: old spellings of a name meet («إسحق» / «إسحاق»), the asides of
+  long catalog forms are set aside, and a man named after a relative («سبط ابن الجوزي») is another author.
+- With arabic-bib's faster keys and name parsing, comparing the same pairs takes about a third of the time (the
+  237,812 pairs of the OpenITI benchmark: 154 s before, 53 s after, 14 workers on one server).
+- Benchmarks of 2026-11-21 against those of 2026-11-13: work level on OpenITI (development) 0.984 precision and
+  0.834 recall (0.984 and 0.812); held out, Wikidata records against OpenITI, 0.981 and 0.757 (0.980 and 0.727)
+  with the same 28 wrong pairs; the 500-book library finds 380 books (376) and leaves 82 items for a person (80).
+- The crosswalk names a work cluster after its plainest full title («رسالة الغفران», not the title that carries
+  an edition note).
+- Command line: no command prints the whole help; `dups` on a path that is not a folder, an unknown source scheme
+  and an offline fetch that is not in the cache are one-line errors; output is UTF-8 on consoles with a legacy code
+  page.
+- `[tool.uv.sources]` takes arabic-bib from its repository, so `uvx --from git+https://github.com/kmbenjel/turath-match
+  turath-match` runs on a clean machine.
+
 ## [0.1.0] - 2026-11-13
 
 ### Added
