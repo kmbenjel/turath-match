@@ -22,7 +22,7 @@ jobs:
         run: |
           mv arabic-bib ../arabic-bib
           uv venv --clear
-          uv pip install -e ../arabic-bib -e ".[dev]"
+          uv pip install --no-sources -e ../arabic-bib -e ".[dev]"
       - name: Lint
         run: |
           uv run --no-sync ruff check src tests

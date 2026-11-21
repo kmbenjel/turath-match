@@ -43,7 +43,9 @@ Changelog = "https://github.com/kmbenjel/turath-match/blob/main/CHANGELOG.md"
 Issues = "https://github.com/kmbenjel/turath-match/issues"
 
 [tool.uv.sources]
-arabic-bib = { path = "../arabic-bib", editable = true }
+# uv takes arabic-bib from its repository, so `uvx --from git+https://github.com/kmbenjel/turath-match turath-match`
+# runs from a clean machine; pip resolves it from PyPI
+arabic-bib = { git = "https://github.com/kmbenjel/arabic-bib" }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/turath_match"]
