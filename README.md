@@ -4,10 +4,10 @@
 trustworthy copy? Every answer comes with its evidence.**
 
 [![CI](https://github.com/kmbenjel/turath-match/actions/workflows/ci.yml/badge.svg)](https://github.com/kmbenjel/turath-match/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/turath-match)](https://pypi.org/project/turath-match/)
-[![Python](https://img.shields.io/pypi/pyversions/turath-match)](https://pypi.org/project/turath-match/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Docs in Arabic](https://img.shields.io/badge/docs-%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-blue)](https://warraq.benjelloun.dev/turath-match/)
+[![PyPI](https://img.shields.io/pypi/v/turath-match.svg)](https://pypi.org/project/turath-match/)
+[![Python](https://img.shields.io/pypi/pyversions/turath-match.svg)](https://pypi.org/project/turath-match/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Arabic docs](https://img.shields.io/badge/docs-%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-0a7)](https://warraq.benjelloun.dev/turath-match/)
 
 ![The demo report: each wish-list title with its verdict and the evidence behind it](docs/media/card.webp)
 

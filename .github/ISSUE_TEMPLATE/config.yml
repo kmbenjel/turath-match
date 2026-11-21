@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: الوثائق العربية · Arabic documentation
+    url: https://warraq.benjelloun.dev/turath-match/
+    about: التثبيت والبدء السريع والأدلة والأسئلة الشائعة. Install, quickstart, guides and FAQ, in Arabic.
+  - name: The Warraq family · أدوات ورّاق
+    url: https://warraq.benjelloun.dev/
+    about: The sister tools and a walk-through that uses them together on a small sample library.
