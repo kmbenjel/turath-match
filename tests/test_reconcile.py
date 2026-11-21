@@ -2,7 +2,7 @@ import json
 from importlib import resources
 
 from turath_match import reconcile
-from turath_match.models import FileRef
+from turath_match.models import FileRef, Record
 from turath_match.reconcile import load_decisions
 from turath_match.report import to_html, to_markdown, write_reports
 from turath_match.sources import open_source
@@ -162,3 +162,22 @@ def test_outputs_follow_the_json_schemas(tmp_path):
         d = json.loads(line)
         check(d, c)
         assert d["cluster_id"].startswith("w_") and len(d["cluster_id"]) == 12
+
+
+def test_a_cluster_is_named_after_its_plainest_full_title():
+    from turath_match.reconcile import build_clusters
+    from turath_match.work import match_work
+
+    plain = Record("openiti", "a", "رسالة الغفران", "أبو العلاء المعري", death=449)
+    noted = Record(
+        "openiti",
+        "b",
+        "رسالة الغفران موافقا للمطبوع = رسالة الغفران - العلمية",
+        "أبو العلاء المعري",
+        death=449,
+    )
+    full = Record("openiti", "c", "التمهيد لما في الموطأ من المعاني والأسانيد", "ابن عبد البر", death=463)
+    short = Record("openiti", "d", "التمهيد لما في الموطأ", "ابن عبد البر", death=463)
+    recs = {r.key: r for r in (plain, noted, full, short)}
+    clusters = build_clusters(recs, [match_work(plain, noted), match_work(full, short)])
+    assert sorted(c["title_ar"] for c in clusters) == [full.title, plain.title]

@@ -40,6 +40,7 @@ from .models import (
 )
 from .provenance import SizeIndex, trace
 from .text import work_id
+from .titles import analyse
 from .work import match_work
 
 STATUSES = ("have", "partial", "have_work", "other_edition", "related_only", "review", "missing")
@@ -269,6 +270,14 @@ def _cluster_id(title: str, author: str) -> str:
     return work_id(title, author)
 
 
+def _names_the_work(r: Record) -> tuple[bool, bool, int, int]:
+    """Rank of a record as the one a cluster is named after: it gives the author and the death year, its first
+    title has the most title words (a full title over a short one), and among equals it is the plainest string,
+    so «رسالة الغفران» names the work rather than «رسالة الغفران موافقا للمطبوع = رسالة الغفران - العلمية»."""
+    forms = analyse(r.title, r.author).forms
+    return bool(r.author), r.death is not None, len(forms[0].core) if forms else 0, -len(r.title)
+
+
 def build_clusters(records: dict[str, Record], pairs: Iterable[Match]) -> list[dict[str, Any]]:
     parent: dict[str, str] = {k: k for k in records}
 
@@ -288,7 +297,7 @@ def build_clusters(records: dict[str, Record], pairs: Iterable[Match]) -> list[d
     for members in groups.values():
         if len(members) < 2:
             continue
-        best = max(members, key=lambda r: (bool(r.author), r.death is not None, len(r.title)))
+        best = max(members, key=_names_the_work)
         uri = next((r.work_uri for r in members if r.work_uri), "")
         ext = sorted({f"{r.scheme}:{r.id}" for r in members if r.scheme != "library"})
         out.append(
